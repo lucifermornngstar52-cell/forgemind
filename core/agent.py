@@ -176,13 +176,14 @@ class ForgemindAgent:
             return f"Error: {e}"
 
     async def run_cycle(self) -> dict:
+        self._initialize_cycle()
         """Run one full self-improvement cycle."""
         console.print("\n[bold cyan]═══ Forgemind Cycle Start ═══[/bold cyan]\n")
 
-        # Initialize git if needed
+        def _initialize_cycle(self):
+        """Initialize the cycle by setting up git and loading memory."""
         self.git.init()
-
-        # Step 1: Analyze
+        console.print("[yellow]Step 1: Analyzing code...[/yellow]")
         console.print("[yellow]Step 1: Analyzing code...[/yellow]")
         structure = self.reader.get_structure()
         weaknesses = self.reader.find_weaknesses()
