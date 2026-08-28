@@ -184,19 +184,29 @@ class ForgemindAgent:
         """Initialize the cycle by setting up git and loading memory."""
         self.git.init()
         console.print("[yellow]Step 1: Analyzing code...[/yellow]")
-        console.print("[yellow]Step 1: Analyzing code...[/yellow]")
+        def _analyze_code(self):
+        """Analyze the code to find structure and weaknesses."""
         structure = self.reader.get_structure()
         weaknesses = self.reader.find_weaknesses()
         console.print(f"  Found {len(weaknesses)} potential improvements")
+        return structure, weaknesses
 
-        # Step 2: Load memory
+    def _load_memory(self):
+        """Load memory summary."""
         memory_summary = self.memory.summary()
         console.print(f"  Memory: {memory_summary.replace(chr(10), ' | ')}")
+        return memory_summary
 
-        # Step 3: Plan
+    def _plan_improvements(self, structure, weaknesses, memory_summary):
+        """Plan improvements based on analysis and memory."""
         console.print("[yellow]Step 2: Planning improvements...[/yellow]")
         plan = self.planner.create_plan(structure, weaknesses, memory_summary)
         console.print(f"  Plan: {len(plan)} steps")
+        return plan
+
+        structure, weaknesses = self._analyze_code()
+        memory_summary = self._load_memory()
+        plan = self._plan_improvements(structure, weaknesses, memory_summary)
 
         # Step 4: Execute with LLM tool-calling loop
         checkpoint_before = self.git.current_hash()
