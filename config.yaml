@@ -1,0 +1,21 @@
+llm:
+  model: gpt-4o
+  temperature: 0.3
+  max_tokens: 4096
+
+agent:
+  max_iterations: 10
+  require_tests_pass: true
+  auto_commit: true
+  human_approval: false
+
+web:
+  search_enabled: true
+  max_pages_per_cycle: 5
+
+memory:
+  store_path: ./memory/store.json
+
+safety:
+  rollback_on_regression: true
+  max_consecutive_failures: 3
