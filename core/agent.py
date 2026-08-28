@@ -127,6 +127,13 @@ class ForgemindAgent:
     It analyzes the code, plans improvements, executes changes, and verifies them through testing.
     """
     def __init__(self, config: dict, root: str = "."):
+        """
+        Initialize the ForgemindAgent with configuration and root directory.
+
+        Args:
+            config (dict): Configuration dictionary containing settings for the agent.
+            root (str): The root directory of the project. Defaults to current directory.
+        """
         self.config = config
         self.root = root
         self.llm = LLM(config.get("llm", {}))
