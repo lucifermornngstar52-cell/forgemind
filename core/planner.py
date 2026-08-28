@@ -22,7 +22,13 @@ Output format: JSON array of steps, each with:
 
 
 class Planner:
+    """Planner class responsible for creating improvement plans based on codebase analysis."""
     def __init__(self, llm):
+        """Initialize the Planner with a language model.
+
+        Args:
+            llm: A language model instance used for generating improvement plans.
+        """
         self.llm = llm
 
     def create_plan(self, codebase_info: dict, weaknesses: list, memory_summary: str) -> list:
