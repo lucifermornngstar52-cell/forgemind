@@ -38,6 +38,14 @@ def test_memory_record():
     assert store.get_success_rate() > 0
 
 
+def test_memory_vector():
+    store = MemoryStore("./memory/test_store.json")
+    if store.vector:
+        store.record_improvement("test vector", "test.py", True, "vector test")
+        results = store.vector.search_improvements("test vector")
+        assert len(results) > 0
+
+
 def test_writer_diff():
     writer = CodeWriter(".")
     diff = writer.diff("nonexistent.py", "new content")
@@ -67,7 +75,6 @@ def test_apk_builder_import():
 
 def test_apk_builder_generates():
     import tempfile
-    import shutil
     from apk_packager.apk_builder import ApkBuilder
 
     builder = ApkBuilder()
@@ -77,3 +84,23 @@ def test_apk_builder_generates():
         assert (Path(out) / "lib" / "main.dart").exists()
         assert (Path(out) / "pubspec.yaml").exists()
         assert (Path(out) / ".github" / "workflows" / "build.yml").exists()
+
+
+def test_arxiv_import():
+    from web.arxiv import search_arxiv
+    assert callable(search_arxiv)
+
+
+def test_huggingface_import():
+    from web.huggingface import search_models
+    assert callable(search_models)
+
+
+def test_stackoverflow_import():
+    from web.stackoverflow import search_error_solution
+    assert callable(search_error_solution)
+
+
+def test_vector_memory_import():
+    from memory.vector_store import VectorMemory
+    assert VectorMemory is not None
