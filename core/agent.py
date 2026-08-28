@@ -180,7 +180,7 @@ class ForgemindAgent:
         """Run one full self-improvement cycle."""
         console.print("\n[bold cyan]═══ Forgemind Cycle Start ═══[/bold cyan]\n")
 
-        def _initialize_cycle(self):
+            def _initialize_cycle(self):
         """Initialize the cycle by setting up git and loading memory."""
         self.git.init()
         console.print("[yellow]Step 1: Analyzing code...[/yellow]")
