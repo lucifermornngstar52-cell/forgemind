@@ -10,7 +10,7 @@ async def search_arxiv(query: str, max_results: int = 5) -> list:
     """Search arXiv for papers matching the query."""
     async with httpx.AsyncClient(timeout=20) as client:
         resp = await client.get(
-            "http://export.arxiv.org/api/query",
+            "https://export.arxiv.org/api/query",
             params={
                 "search_query": f"all:{query}",
                 "start": 0,

@@ -22,6 +22,11 @@ console = Console()
 
 
 def load_config() -> dict:
+    """Load the configuration from a YAML file.
+
+    Returns:
+        dict: The configuration data loaded from 'config.yaml'. If the file does not exist, returns an empty dictionary.
+    """
     config_path = Path("config.yaml")
     if config_path.exists():
         return yaml.safe_load(config_path.read_text())

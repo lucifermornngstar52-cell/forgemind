@@ -65,7 +65,10 @@ async def research_self_improvement() -> dict:
     all_findings = []
 
     # arXiv papers
-    papers = await search_ai_self_improvement()
+    try:
+        papers = await search_ai_self_improvement()
+    except Exception as e:
+        papers = []
     for p in papers:
         all_findings.append({
             "query": "self-improving AI",
@@ -101,7 +104,10 @@ async def research_self_improvement() -> dict:
                 pass
 
     # HuggingFace models for code improvement
-    models = await search_models("code improvement agent", limit=3)
+    try:
+        models = await search_models("code improvement agent", limit=3)
+    except Exception as e:
+        models = []
     for m in models:
         all_findings.append({
             "query": "code improvement",
