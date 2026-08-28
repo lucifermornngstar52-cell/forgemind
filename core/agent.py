@@ -122,6 +122,10 @@ Start by analyzing your own code structure, then identify the highest-impact imp
 
 
 class ForgemindAgent:
+    """
+    The ForgemindAgent class is responsible for managing the self-improvement cycle of the AI.
+    It analyzes the code, plans improvements, executes changes, and verifies them through testing.
+    """
     def __init__(self, config: dict, root: str = "."):
         self.config = config
         self.root = root
