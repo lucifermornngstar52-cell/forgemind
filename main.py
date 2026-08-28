@@ -21,6 +21,12 @@ console = Console()
 
 
 def load_config() -> dict:
+    """
+    Load the configuration from a YAML file.
+
+    Returns:
+        dict: The configuration settings.
+    """
     config_path = Path("config.yaml")
     if config_path.exists():
         return yaml.safe_load(config_path.read_text())
@@ -28,6 +34,15 @@ def load_config() -> dict:
 
 
 async def run_cycle(research: bool = False) -> dict:
+    """
+    Execute a single improvement cycle.
+
+    Args:
+        research (bool): If True, perform research before the cycle.
+
+    Returns:
+        dict: The result of the cycle execution.
+    """
     from core.agent import ForgemindAgent
 
     config = load_config()
@@ -41,6 +56,13 @@ async def run_cycle(research: bool = False) -> dict:
 
 
 async def run_loops(count: int, research: bool = False) -> None:
+    """
+    Run multiple improvement cycles.
+
+    Args:
+        count (int): Number of cycles to run.
+        research (bool): If True, perform research during the first cycle.
+    """
     for i in range(count):
         console.print(f"\n[bold blue]═══════ CYCLE {i+1}/{count} ═══════[/bold blue]")
         result = await run_cycle(research=(research and i == 0))
@@ -52,6 +74,9 @@ async def run_loops(count: int, research: bool = False) -> None:
 
 
 def show_status() -> None:
+    """
+    Display the current status of the agent's memory and metrics.
+    """
     from memory.store import MemoryStore
     config = load_config()
     store = MemoryStore(config.get("memory", {}).get("store_path", "./memory/store.json"))
@@ -79,6 +104,9 @@ def show_status() -> None:
 
 
 def main():
+    """
+    Parse command-line arguments and initiate the appropriate action.
+    """
     parser = argparse.ArgumentParser(description="Forgemind — Self-Improving AI Agent")
     parser.add_argument("--research", action="store_true", help="Research techniques before improving")
     parser.add_argument("--loop", type=int, default=1, help="Number of cycles to run")

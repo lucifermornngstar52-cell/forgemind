@@ -10,7 +10,7 @@ class LLM:
         self.model = config.get("model", "gpt-4o")
         self.temperature = config.get("temperature", 0.3)
         self.max_tokens = config.get("max_tokens", 4096)
-        self.client = OpenAI(api_key=os.environ.get("OPENAI_API_KEY", ""))
+        self.client = OpenAI(api_key=os.environ.get("OPENAI_PROJECT_KEY", os.environ.get("OPENAI_API_KEY", "")))
 
     def chat(self, messages: list, tools: list = None) -> dict:
         """Send chat completion, return response with optional tool calls."""

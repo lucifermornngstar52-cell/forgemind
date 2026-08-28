@@ -7,9 +7,9 @@ Cycle:
 3. Plan improvements (planner module)
 4. Apply changes (writer)
 5. Run tests (runner)
-6. If passed → commit (git), record success (memory)
-7. If failed → read error, fix, retry (max 3)
-8. If regression → rollback
+6. If passed -> commit (git), record success (memory)
+7. If failed -> read error, fix, retry (max 3)
+8. If regression -> rollback
 """
 
 import json
@@ -26,8 +26,6 @@ from rich.console import Console
 
 console = Console()
 
-
-# Tool definitions for function calling
 TOOLS = [
     {
         "type": "function",
@@ -210,7 +208,22 @@ class ForgemindAgent:
             console.print(f"\n[cyan]── Iteration {iterations}/{self.max_iterations} ──[/cyan]")
 
             response = self.llm.chat(self.messages, tools=TOOLS)
-            self.messages.append({"role": "assistant", "content": response["content"]})
+
+            # Build assistant message properly — include tool_calls if present
+            assistant_msg = {"role": "assistant", "content": response["content"]}
+            if response["tool_calls"]:
+                assistant_msg["tool_calls"] = [
+                    {
+                        "id": tc.id,
+                        "type": "function",
+                        "function": {
+                            "name": tc.function.name,
+                            "arguments": tc.function.arguments,
+                        },
+                    }
+                    for tc in response["tool_calls"]
+                ]
+            self.messages.append(assistant_msg)
 
             if not response["tool_calls"]:
                 # Agent is done talking
@@ -221,7 +234,7 @@ class ForgemindAgent:
             for tc in response["tool_calls"]:
                 fn_name = tc.function.name
                 fn_args = json.loads(tc.function.arguments)
-                console.print(f"  [dim]→ {fn_name}({list(fn_args.keys())})[/dim]")
+                console.print(f"  [dim]-> {fn_name}({list(fn_args.keys())})[/dim]")
 
                 result = await self._execute_tool(fn_name, fn_args)
 
@@ -233,29 +246,31 @@ class ForgemindAgent:
 
                 # If tests were run, check result
                 if fn_name == "run_tests":
-                    test_result = json.loads(result)
-                    if test_result["passed"]:
-                        console.print("  [green]✓ Tests passed[/green]")
+                    try:
+                        test_result = json.loads(result)
+                    except json.JSONDecodeError:
+                        test_result = {"passed": False, "stderr": result}
+
+                    if test_result.get("passed"):
+                        console.print("  [green]Tests passed[/green]")
                         self.consecutive_failures = 0
 
-                        # Commit improvement
                         if self.config.get("agent", {}).get("auto_commit", True):
                             commit = self.git.checkpoint(f"improvement: iteration {iterations}")
-                            console.print(f"  [green]✓ Committed: {commit[:8]}[/green]")
+                            console.print(f"  [green]Committed: {commit[:8]}[/green]")
                             self.memory.record_improvement(
                                 f"Iteration {iterations}", "multiple", True,
-                                f"Tests passed after change"
+                                "Tests passed after change"
                             )
                     else:
-                        console.print("  [red]✗ Tests failed[/red]")
+                        console.print("  [red]Tests failed[/red]")
                         self.consecutive_failures += 1
 
                         self.memory.record_improvement(
                             f"Iteration {iterations}", "multiple", False,
-                            test_result["stderr"][:500]
+                            test_result.get("stderr", "")[:500]
                         )
 
-                        # Rollback if too many failures
                         if self.consecutive_failures >= self.max_failures:
                             console.print(f"  [red]Max failures reached. Rolling back.[/red]")
                             self.git.rollback(checkpoint_before)
@@ -279,12 +294,12 @@ class ForgemindAgent:
         console.print("[yellow]Researching self-improvement techniques...[/yellow]")
         findings = await research_self_improvement()
 
-        for f in findings["findings"]:
+        for f in findings.get("findings", []):
             self.memory.record_technique(
                 name=f.get("query", "unknown"),
                 source=f.get("url", ""),
                 summary=f.get("snippet", f.get("content", "")[:200]),
             )
 
-        console.print(f"[green]Learned {len(findings['findings'])} techniques[/green]")
+        console.print(f"[green]Learned {len(findings.get('findings', []))} techniques[/green]")
         return findings
