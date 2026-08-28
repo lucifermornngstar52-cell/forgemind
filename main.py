@@ -34,6 +34,16 @@ def load_config() -> dict:
 
 
 async def run_cycle(research: bool = False) -> dict:
+    """
+    Execute one improvement cycle of the Forgemind agent.
+
+    Args:
+        research (bool): If True, the agent will research external techniques before running the cycle.
+
+    Returns:
+        dict: The result of the cycle, including success rate and other metrics.
+    """
+
     from core.agent import ForgemindAgent
 
     config = load_config()
