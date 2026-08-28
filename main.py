@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Forgemind — Self-Improving AI Agent
+FORGEMIND — Self-Improving AI Agent
 The mind that forges itself.
 
 Usage:
@@ -9,6 +9,7 @@ Usage:
     python main.py --loop N     # Run N cycles
     python main.py --status     # Show memory & metrics
     python main.py --build-apk  # Package self into an Android APK
+    python main.py --bot        # Start Telegram bot (24/7 mode)
 """
 
 import asyncio
@@ -22,11 +23,7 @@ console = Console()
 
 
 def load_config() -> dict:
-    """Load the configuration from a YAML file.
-
-    Returns:
-        dict: The configuration data loaded from 'config.yaml'. If the file does not exist, returns an empty dictionary.
-    """
+    """Load the configuration from a YAML file."""
     config_path = Path("config.yaml")
     if config_path.exists():
         return yaml.safe_load(config_path.read_text())
@@ -34,71 +31,60 @@ def load_config() -> dict:
 
 
 async def run_cycle(research: bool = False) -> dict:
-    """
-    Execute one improvement cycle of the Forgemind agent.
-
-    Args:
-        research (bool): If True, the agent will research external techniques before running the cycle.
-
-    Returns:
-        dict: The result of the cycle, including success rate and other metrics.
-    """
-
+    """Execute one improvement cycle of the FORGEMIND agent."""
     from core.agent import ForgemindAgent
-
     config = load_config()
     agent = ForgemindAgent(config, root=".")
-
     if research:
         console.print("[bold magenta]Phase 0: Researching external techniques...[/bold magenta]")
         await agent.research_and_learn()
-
     return await agent.run_cycle()
 
 
 async def run_loops(count: int, research: bool = False) -> None:
-    """
-    Run multiple improvement cycles of the Forgemind agent.
-
-    Args:
-        count (int): The number of cycles to run.
-        research (bool): If True, the agent will research external techniques before the first cycle.
-    """
-
+    """Run multiple improvement cycles."""
     for i in range(count):
         console.print(f"\n[bold blue]═══════ CYCLE {i+1}/{count} ═══════[/bold blue]")
         result = await run_cycle(research=(research and i == 0))
-
         if result["success_rate"] > 0 and result["success_rate"] < 0.3:
             console.print("[bold red]Success rate too low. Stopping for safety.[/bold red]")
             break
 
 
 def build_apk() -> None:
-    """Package Forgemind into an Android APK."""
+    """Package FORGEMIND into an Android APK."""
     import os
     from apk_packager.apk_builder import ApkBuilder
-
     console.print("[bold cyan]⚒️ Forgemind Self-Packaging: APK Build[/bold cyan]\n")
-
     builder = ApkBuilder(github_token=os.environ.get("GITHUB_TOKEN_2", ""))
     result = builder.build_apk()
     console.print(result)
 
 
-def show_status() -> None:
-    """
-    Display the current status of the Forgemind agent.
+async def run_bot() -> None:
+    """Start the Telegram bot for 24/7 interaction."""
+    import os
+    from tools.telegram_bot import ForgemindTelegramBot
+    token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+    if not token:
+        console.print("[bold red]TELEGRAM_BOT_TOKEN not set![/bold red]")
+        return
+    config = load_config()
+    bot = ForgemindTelegramBot(token, config)
+    console.print("[bold cyan]╔══════════════════════════════════╗[/bold cyan]")
+    console.print("[bold cyan]║  FORGEMIND Telegram Bot Online   ║[/bold cyan]")
+    console.print("[bold cyan]║  @Fermaindbot                    ║[/bold cyan]")
+    console.print("[bold cyan]╚══════════════════════════════════╝[/bold cyan]")
+    await bot.run()
 
-    This function retrieves and displays various metrics related to the agent's performance,
-    such as the number of improvements, failures, success rate, and techniques learned.
-    It also lists recent improvements and failures for review.
-    """
+
+def show_status() -> None:
+    """Display the current status of the FORGEMIND agent."""
     from memory.store import MemoryStore
     config = load_config()
     store = MemoryStore(config.get("memory", {}).get("store_path", "./memory/store.json"))
 
-    table = Table(title="Forgemind Status", show_header=True, header_style="bold cyan")
+    table = Table(title="FORGEMIND Status", show_header=True, header_style="bold cyan")
     table.add_column("Metric", style="white")
     table.add_column("Value", style="green")
 
@@ -121,22 +107,13 @@ def show_status() -> None:
 
 
 def main():
-    """
-    Main entry point for the Forgemind AI agent.
-
-    This function parses command-line arguments to determine the mode of operation:
-    - `--research`: Research techniques before improving.
-    - `--loop N`: Run N cycles of improvement.
-    - `--status`: Show the current status and exit.
-    - `--build-apk`: Package the agent into an Android APK.
-
-    Depending on the arguments, it either shows the status, builds an APK, or runs the specified number of improvement cycles.
-    """
-    parser = argparse.ArgumentParser(description="Forgemind — Self-Improving AI Agent")
+    """Main entry point for the FORGEMIND AI agent."""
+    parser = argparse.ArgumentParser(description="FORGEMIND — Self-Improving AI Agent")
     parser.add_argument("--research", action="store_true", help="Research techniques before improving")
     parser.add_argument("--loop", type=int, default=1, help="Number of cycles to run")
     parser.add_argument("--status", action="store_true", help="Show status and exit")
     parser.add_argument("--build-apk", action="store_true", help="Package self into an Android APK")
+    parser.add_argument("--bot", action="store_true", help="Start Telegram bot (24/7 mode)")
     args = parser.parse_args()
 
     if args.status:
@@ -147,8 +124,12 @@ def main():
         build_apk()
         return
 
+    if args.bot:
+        asyncio.run(run_bot())
+        return
+
     console.print("[bold cyan]╔══════════════════════════════════╗[/bold cyan]")
-    console.print("[bold cyan]║         FORGEMIND v0.2.0          ║[/bold cyan]")
+    console.print("[bold cyan]║         FORGEMIND v0.3.0          ║[/bold cyan]")
     console.print("[bold cyan]║    The mind that forges itself     ║[/bold cyan]")
     console.print("[bold cyan]╚══════════════════════════════════╝[/bold cyan]")
 
