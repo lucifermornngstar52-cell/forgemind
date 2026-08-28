@@ -46,7 +46,6 @@ def test_writer_diff():
 
 def test_git_ops_init():
     git = GitOps(".")
-    # Should not crash
     git.init()
 
 
@@ -58,3 +57,23 @@ def test_config_exists():
 def test_requirements_exist():
     from pathlib import Path
     assert Path("requirements.txt").exists()
+
+
+def test_apk_builder_import():
+    from apk_packager.apk_builder import ApkBuilder
+    builder = ApkBuilder()
+    assert builder is not None
+
+
+def test_apk_builder_generates():
+    import tempfile
+    import shutil
+    from apk_packager.apk_builder import ApkBuilder
+
+    builder = ApkBuilder()
+    with tempfile.TemporaryDirectory() as tmpdir:
+        out = builder.generate_flutter_project(output_dir=f"{tmpdir}/forgemind-mobile")
+        from pathlib import Path
+        assert (Path(out) / "lib" / "main.dart").exists()
+        assert (Path(out) / "pubspec.yaml").exists()
+        assert (Path(out) / ".github" / "workflows" / "build.yml").exists()

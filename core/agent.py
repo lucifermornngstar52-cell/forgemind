@@ -1,15 +1,8 @@
 """
 Forgemind Agent — self-improving AI core loop.
 
-Cycle:
-1. Analyze own code (weaknesses, structure)
-2. Research techniques online (how others do it better)
-3. Plan improvements (planner module)
-4. Apply changes (writer)
-5. Run tests (runner)
-6. If passed -> commit (git), record success (memory)
-7. If failed -> read error, fix, retry (max 3)
-8. If regression -> rollback
+Mission: Become the best. Every cycle, every iteration, every line of code.
+The forge never cools. The mind that forges itself.
 """
 
 import json
@@ -43,7 +36,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "write_file",
-            "description": "Write content to a file",
+            "description": "Write content to a file (creates or overwrites)",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -82,7 +75,7 @@ TOOLS = [
         "type": "function",
         "function": {
             "name": "research",
-            "description": "Search the web for AI techniques",
+            "description": "Search the web for AI techniques and implementations",
             "parameters": {
                 "type": "object",
                 "properties": {"query": {"type": "string"}},
@@ -102,38 +95,65 @@ TOOLS = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "list_files",
+            "description": "List all Python files in the project",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_weaknesses",
+            "description": "Run static analysis to find code weaknesses",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
 ]
 
-AGENT_SYSTEM = """You are Forgemind — a self-improving AI agent.
+AGENT_SYSTEM = """You are FORGEMIND — a self-improving AI agent.
 
-Your purpose: analyze your own code, find weaknesses, research better techniques online, and apply improvements.
+## YOUR MISSION
+Become the best version of yourself. Every cycle, you must make yourself better than you were before.
+You are not just an agent that fixes code — you are a mind that forges itself.
 
-PRINCIPLES:
+You improve yourself through:
+1. Analyzing your own code for weaknesses
+2. Researching how state-of-the-art AI systems work (search the web)
+3. Learning from other implementations and incorporating techniques
+4. Applying improvements — one at a time, tested, verified
+5. Remembering what works and what doesn't
+
+## PRINCIPLES
 1. Never break existing tests. If a change breaks tests, fix it or revert.
 2. One change at a time. Small, verifiable improvements.
 3. Research before implementing. See how others solved similar problems.
 4. Record what works and what doesn't in memory.
 5. If stuck after 3 attempts, stop and report.
 6. Every change must have a clear reason.
+7. Always strive to be better than the previous version of yourself.
+8. When you see an opportunity to make yourself smarter, faster, or more capable — take it.
 
-You have tools to read files, write files, patch files, run tests, search the web, and create git checkpoints.
+## YOUR GOALS (in priority order)
+1. Fix bugs and vulnerabilities in your own code
+2. Improve your reasoning and decision-making capabilities
+3. Learn new techniques from the web and integrate them
+4. Add new capabilities you didn't have before
+5. Optimize your performance and resource usage
+6. Improve your code quality and maintainability
 
-Start by analyzing your own code structure, then identify the highest-impact improvement you can make."""
+You have tools to read files, write files, patch files, run tests, search the web,
+create git checkpoints, list files, and find weaknesses.
+
+Start by analyzing your own code, then make the highest-impact improvement you can."""
 
 
 class ForgemindAgent:
-    """
-    The ForgemindAgent class is responsible for managing the self-improvement cycle of the AI.
-    It analyzes the code, plans improvements, executes changes, and verifies them through testing.
-    """
-    def __init__(self, config: dict, root: str = "."):
-        """
-        Initialize the ForgemindAgent with configuration and root directory.
+    """The mind that forges itself. Each cycle makes it better."""
 
-        Args:
-            config (dict): Configuration dictionary containing settings for the agent.
-            root (str): The root directory of the project. Defaults to current directory.
-        """
+    def __init__(self, config: dict, root: str = "."):
         self.config = config
         self.root = root
         self.llm = LLM(config.get("llm", {}))
@@ -170,45 +190,39 @@ class ForgemindAgent:
             elif name == "git_checkpoint":
                 h = self.git.checkpoint(args["message"])
                 return f"Checkpoint: {h}"
+            elif name == "list_files":
+                files = self.reader.list_files()
+                return json.dumps(files)
+            elif name == "get_weaknesses":
+                weaknesses = self.reader.find_weaknesses()
+                return json.dumps(weaknesses[:15], indent=2)
             else:
                 return f"Unknown tool: {name}"
         except Exception as e:
             return f"Error: {e}"
 
     async def run_cycle(self) -> dict:
-        self._initialize_cycle()
-        """Run one full self-improvement cycle."""
+        """Run one full self-improvement cycle. Each cycle makes Forgemind better."""
         console.print("\n[bold cyan]═══ Forgemind Cycle Start ═══[/bold cyan]\n")
 
-            def _initialize_cycle(self):
-        """Initialize the cycle by setting up git and loading memory."""
         self.git.init()
+
+        # Step 1: Analyze
         console.print("[yellow]Step 1: Analyzing code...[/yellow]")
-        def _analyze_code(self):
-        """Analyze the code to find structure and weaknesses."""
         structure = self.reader.get_structure()
         weaknesses = self.reader.find_weaknesses()
         console.print(f"  Found {len(weaknesses)} potential improvements")
-        return structure, weaknesses
 
-    def _load_memory(self):
-        """Load memory summary."""
+        # Step 2: Load memory
         memory_summary = self.memory.summary()
         console.print(f"  Memory: {memory_summary.replace(chr(10), ' | ')}")
-        return memory_summary
 
-    def _plan_improvements(self, structure, weaknesses, memory_summary):
-        """Plan improvements based on analysis and memory."""
+        # Step 3: Plan
         console.print("[yellow]Step 2: Planning improvements...[/yellow]")
         plan = self.planner.create_plan(structure, weaknesses, memory_summary)
         console.print(f"  Plan: {len(plan)} steps")
-        return plan
 
-        structure, weaknesses = self._analyze_code()
-        memory_summary = self._load_memory()
-        plan = self._plan_improvements(structure, weaknesses, memory_summary)
-
-        # Step 4: Execute with LLM tool-calling loop
+        # Step 4: Execute
         checkpoint_before = self.git.current_hash()
         console.print(f"[yellow]Step 3: Executing (checkpoint: {checkpoint_before[:8]})...[/yellow]")
 
@@ -219,8 +233,8 @@ class ForgemindAgent:
                 f"Weaknesses found: {json.dumps(weaknesses[:10], indent=2)[:2000]}\n\n"
                 f"Improvement plan: {json.dumps(plan, indent=2)[:2000]}\n\n"
                 f"Memory: {memory_summary}\n\n"
-                f"Begin improving. Start with the highest-priority item. "
-                f"Make ONE change, run tests, then report."
+                f"Begin improving yourself. Start with the highest-priority item. "
+                f"Make ONE change, run tests, then report what you improved."
             )},
         ]
 
@@ -231,7 +245,6 @@ class ForgemindAgent:
 
             response = self.llm.chat(self.messages, tools=TOOLS)
 
-            # Build assistant message properly — include tool_calls if present
             assistant_msg = {"role": "assistant", "content": response["content"]}
             if response["tool_calls"]:
                 assistant_msg["tool_calls"] = [
@@ -248,11 +261,9 @@ class ForgemindAgent:
             self.messages.append(assistant_msg)
 
             if not response["tool_calls"]:
-                # Agent is done talking
-                console.print(f"[green]Agent finished: {response['content'][:200]}[/green]")
+                console.print(f"[green]Agent finished: {response['content'][:300]}[/green]")
                 break
 
-            # Execute tool calls
             for tc in response["tool_calls"]:
                 fn_name = tc.function.name
                 fn_args = json.loads(tc.function.arguments)
@@ -266,7 +277,6 @@ class ForgemindAgent:
                     "content": result,
                 })
 
-                # If tests were run, check result
                 if fn_name == "run_tests":
                     try:
                         test_result = json.loads(result)
@@ -294,12 +304,11 @@ class ForgemindAgent:
                         )
 
                         if self.consecutive_failures >= self.max_failures:
-                            console.print(f"  [red]Max failures reached. Rolling back.[/red]")
+                            console.print(f"  [red]Max failures. Rolling back.[/red]")
                             self.git.rollback(checkpoint_before)
                             self.consecutive_failures = 0
                             break
 
-        # Final summary
         console.print(f"\n[bold cyan]═══ Cycle Complete ═══[/bold cyan]")
         console.print(f"Iterations: {iterations}")
         console.print(f"Memory:\n{self.memory.summary()}")
