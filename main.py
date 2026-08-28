@@ -57,6 +57,14 @@ async def run_cycle(research: bool = False) -> dict:
 
 
 async def run_loops(count: int, research: bool = False) -> None:
+    """
+    Run multiple improvement cycles of the Forgemind agent.
+
+    Args:
+        count (int): The number of cycles to run.
+        research (bool): If True, the agent will research external techniques before the first cycle.
+    """
+
     for i in range(count):
         console.print(f"\n[bold blue]═══════ CYCLE {i+1}/{count} ═══════[/bold blue]")
         result = await run_cycle(research=(research and i == 0))
