@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: forgemind-bot
+    runtime: python
+    buildCommand: pip install httpx pyyaml rich
+    startCommand: python run_bot.py
+    envVars:
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: GH_PAT
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+    plan: free
+    autoDeploy: true
