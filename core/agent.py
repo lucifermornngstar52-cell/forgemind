@@ -209,6 +209,12 @@ class ForgemindAgent:
     """The mind that forges itself. Each cycle makes it better."""
 
     def __init__(self, config: dict, root: str = "."):
+        """
+        Initialize the ForgemindAgent.
+
+        :param config: Configuration dictionary for the agent.
+        :param root: Root directory for the agent's operations.
+        """
         self.config = config
         self.root = root
         self.llm = LLM(config.get("llm", {}))
