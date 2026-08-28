@@ -121,6 +121,17 @@ def show_status() -> None:
 
 
 def main():
+    """
+    Main entry point for the Forgemind AI agent.
+
+    This function parses command-line arguments to determine the mode of operation:
+    - `--research`: Research techniques before improving.
+    - `--loop N`: Run N cycles of improvement.
+    - `--status`: Show the current status and exit.
+    - `--build-apk`: Package the agent into an Android APK.
+
+    Depending on the arguments, it either shows the status, builds an APK, or runs the specified number of improvement cycles.
+    """
     parser = argparse.ArgumentParser(description="Forgemind — Self-Improving AI Agent")
     parser.add_argument("--research", action="store_true", help="Research techniques before improving")
     parser.add_argument("--loop", type=int, default=1, help="Number of cycles to run")
