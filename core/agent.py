@@ -27,7 +27,21 @@ class ForgemindAgent:
         self.consecutive_failures = 0
 
     async def _execute_tool(self, name: str, args: dict) -> str:
-        # ... (existing code remains unchanged)
+        """Execute a tool by name with given arguments."""
+        if name == "patch_code":
+            return self.hands.apply_patch(args.get("file"), args.get("patch"))
+        elif name == "read_file":
+            return self.reader.read_file(args.get("file"))
+        elif name == "search_web":
+            return self.eyes.search(args.get("query", ""))
+        elif name == "run_tests":
+            return self.mirror.run_tests()
+        elif name == "git_checkpoint":
+            return self.git.checkpoint(args.get("message", "checkpoint"))
+        elif name == "git_rollback":
+            return self.git.rollback()
+        else:
+            return f"Unknown tool: {name}"
 
     def initialize_cycle(self):
         """Initialize the cycle by setting up the git repository and preparing the console."""
@@ -162,4 +176,14 @@ class ForgemindAgent:
         }
 
     async def research_and_learn(self) -> dict:
-        # ... (existing code remains unchanged)
+        """Research external techniques and learn from them."""
+        console.print("[magenta]Researching external techniques...[/magenta]")
+        techniques = await self.eyes.search("best practices for autonomous AI agents python 2024 2025")
+        for tech in techniques[:5]:
+            self.memory.add_technique(
+                name=tech.get("title", "unknown"),
+                source="web_search",
+                summary=tech.get("snippet", str(tech)[:200])
+            )
+        return {"techniques_learned": len(techniques)}
+
