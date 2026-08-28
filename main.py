@@ -87,6 +87,13 @@ def build_apk() -> None:
 
 
 def show_status() -> None:
+    """
+    Display the current status of the Forgemind agent.
+
+    This function retrieves and displays various metrics related to the agent's performance,
+    such as the number of improvements, failures, success rate, and techniques learned.
+    It also lists recent improvements and failures for review.
+    """
     from memory.store import MemoryStore
     config = load_config()
     store = MemoryStore(config.get("memory", {}).get("store_path", "./memory/store.json"))
