@@ -1,0 +1,42 @@
+name: Forgemind Auto-Cycle
+
+on:
+  schedule:
+    # Каждые 2 часа
+    - cron: '0 */2 * * *'
+  workflow_dispatch:
+
+jobs:
+  self-improve:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run self-improvement cycle
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN_2: ${{ secrets.GH_PAT }}
+        run: python main.py --loop 3
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "Forgemind Bot"
+          git config user.email "forgemind@bot.local"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "auto: self-improvement cycle $(date -u +%Y-%m-%dT%H:%M)"
+            git push
+          fi
