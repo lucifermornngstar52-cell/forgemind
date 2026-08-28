@@ -8,3 +8,4 @@ memory/test_store.json
 *.egg-info/
 dist/
 build/
+forgemind-mobile/
