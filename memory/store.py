@@ -36,8 +36,9 @@ class MemoryStore:
         if self.github_store:
             data = self.github_store.load_memory()
             if data:
-                # Also save locally for fast access during this session
-                self.save()
+                # Cache locally for fast access this session (self.data not set yet — write directly)
+                self.path.parent.mkdir(parents=True, exist_ok=True)
+                self.path.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
                 return data
         # Local: load from file
         if self.path.exists():
