@@ -58,6 +58,12 @@ PHASE 4 — VERIFY (after patching):
   If the diagnostic reports syntax errors or test failures, rollback
   immediately with git_rollback.
 
+PHASE 5 — DEPLOY (after successful verify):
+  Use render_status to check if the service is live.
+  If the service is down or has failed deploys, use render_redeploy.
+  If the service is unhealthy, use render_auto_recover to self-heal.
+  Use render_logs to debug any deploy failures.
+
 Skip phases only if you already have enough context from the research provided.
 """
 
@@ -142,6 +148,48 @@ TOOLS = [
             "parameters": {"type": "object", "properties": {}},
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "render_status",
+            "description": "Check the status of your Render hosting service — current deploy, URL, health, recent deploys.",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "render_redeploy",
+            "description": "Trigger a new deploy on Render. Use this after making changes that need to go live, or if the service is unhealthy.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "clear_cache": {"type": "boolean", "description": "Clear build cache before deploying"}
+                }
+            }
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "render_logs",
+            "description": "Read recent deploy logs from Render for debugging failures.",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "lines": {"type": "integer", "description": "Number of log lines to read"}
+                }
+            }
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "render_auto_recover",
+            "description": "Check service health and automatically redeploy if unhealthy. Use this when you suspect the service is down.",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
 ]
 
 
@@ -189,6 +237,23 @@ class ForgemindAgent:
                 diag = SelfDiagnostic(root=self.root)
                 results = diag.run_full_check()
                 return json.dumps(results, indent=2)
+            elif name == "render_status":
+                from tools.render_ops import RenderOps
+                ops = RenderOps()
+                return ops.status()
+            elif name == "render_redeploy":
+                from tools.render_ops import RenderOps
+                ops = RenderOps()
+                clear = args.get("clear_cache", False)
+                return ops.redeploy(clear_cache=clear)
+            elif name == "render_logs":
+                from tools.render_ops import RenderOps
+                ops = RenderOps()
+                return ops.logs(lines=args.get("lines", 50))
+            elif name == "render_auto_recover":
+                from tools.render_ops import RenderOps
+                ops = RenderOps()
+                return ops.auto_recover()
             else:
                 return f"Unknown tool: {name}"
         except Exception as e:
