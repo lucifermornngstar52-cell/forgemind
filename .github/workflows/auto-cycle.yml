@@ -9,7 +9,7 @@ on:
 jobs:
   self-improve:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -27,7 +27,7 @@ jobs:
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
           GITHUB_TOKEN_2: ${{ secrets.GH_PAT }}
-        run: python main.py --loop 3
+        run: python main.py --loop 3 --research
 
       - name: Commit and push changes
         run: |
