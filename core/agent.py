@@ -204,7 +204,7 @@ class ForgemindAgent:
 
             response = self.llm.chat(self.messages, tools=TOOLS)
 
-            assistant_msg = {"role": "assistant", "content": response["content"]}
+            assistant_msg = {"role": "assistant", "content": response.get("content") or ""}
             if response.get("tool_calls"):
                 assistant_msg["tool_calls"] = [
                     {
