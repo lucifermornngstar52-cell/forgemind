@@ -336,7 +336,7 @@ class ForgemindAgent:
         tech_count = 0
         for topic, data in knowledge.items():
             for result in data.get("search_results", [])[:2]:
-                self.memory.add_technique(
+                self.memory.record_technique(
                     name=result.get("title", "unknown")[:100],
                     source="web_search",
                     summary=result.get("snippet", str(result))[:200]
