@@ -23,6 +23,11 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
+      - name: Run self-diagnostic
+        env:
+          GITHUB_TOKEN_2: ${{ secrets.GH_PAT }}
+        run: python -c "from core.diagnostic import SelfDiagnostic; d = SelfDiagnostic('.'); r = d.run_full_check(); print('PASS' if r['syntax_ok'] and r['git_ok'] else 'FAIL')"
+
       - name: Run self-improvement cycle
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
