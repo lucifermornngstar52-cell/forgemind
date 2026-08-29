@@ -1,0 +1,44 @@
+name: Deep Research Cycle
+
+on:
+  schedule:
+    # Каждые 4 часа — сбор гайдов, статей, best practices
+    - cron: "0 */4 * * *"
+  workflow_dispatch:
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install deps
+        run: pip install httpx pyyaml rich openai beautifulsoup4 chromadb
+
+      - name: Run deep research cycle
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_TOKEN_2: ${{ secrets.GH_PAT }}
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+        run: python main.py --loop 2 --research --deep
+
+      - name: Commit findings
+        run: |
+          git config user.name "Forgemind"
+          git config user.email "forge@self.ai"
+          git add -A
+          if git diff --staged --quiet; then
+            echo "No new findings"
+          else
+            git commit -m "research: deep knowledge gathering $(date -u +%Y-%m-%dT%H:%M)"
+            git push
+          fi
