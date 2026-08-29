@@ -278,7 +278,7 @@ class ForgemindAgent:
         console.print("\n[bold cyan]═══ Forgemind Cycle Start ═══[/bold cyan]\n")
         self.git.init()
 
-    async def run_cycle(self) -> dict:
+    async def run_cycle(self, deep_research: bool = False) -> dict:
         """Run one full self-improvement cycle."""
         self.initialize_cycle()
 
