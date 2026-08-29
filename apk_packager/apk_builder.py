@@ -62,9 +62,9 @@ class _ForgemindHomeState extends State<ForgemindHome> {
     try {
       // Forgemind runs locally via platform channel or HTTP
       final response = await http.post(
-        Uri.parse('http://localhost:8000/cycle'),
+        Uri.parse('https://forgemind-bot-hehb.onrender.com/cycle'),
         headers: {'Content-Type': 'application/json'},
-      );
+      ).timeout(const Duration(seconds: 20));
 
       final result = json.decode(response.body);
       setState(() {
