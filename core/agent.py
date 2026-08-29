@@ -29,6 +29,12 @@ Rules:
 5. Never replace code with comments like "# ... unchanged"
 6. Keep changes small and focused
 7. Document what you changed and why
+8. CRITICAL: the "patch" argument for patch_code MUST be the COMPLETE, FULL contents
+   of the file after your change — a valid, runnable file from the first line to the
+   last. NEVER pass a unified diff (no "---", "+++", "@@" markers) and NEVER pass a
+   partial snippet. The tool overwrites the whole file with exactly what you send.
+   Always read_file first to get the current full content, then send back the full
+   modified version.
 """
 
 TOOLS = [
