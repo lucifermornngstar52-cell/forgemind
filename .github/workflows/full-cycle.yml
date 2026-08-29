@@ -44,8 +44,9 @@ jobs:
             echo "No new findings"
           else
             git commit -m "research: knowledge gathering $(date -u +%Y-%m-%dT%H:%M)"
-            git pull --rebase || true
-            git push
+            git fetch origin main
+            git rebase origin/main || git rebase --abort || true
+            git push origin HEAD:main || git push --force-with-lease origin HEAD:main
           fi
 
   code:
@@ -86,8 +87,9 @@ jobs:
             echo "No changes"
           else
             git commit -m "auto: self-improvement cycle $(date -u +%Y-%m-%dT%H:%M)"
-            git pull --rebase || true
-            git push
+            git fetch origin main
+            git rebase origin/main || git rebase --abort || true
+            git push origin HEAD:main || git push --force-with-lease origin HEAD:main
           fi
 
   deploy:
