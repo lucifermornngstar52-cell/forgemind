@@ -129,23 +129,27 @@ class ForgemindAgent:
 
     async def _execute_tool(self, name: str, args: dict) -> str:
         """Execute a tool by name with given arguments."""
-        if name == "patch_code":
-            return self.writer.write_file(args.get("file"), args.get("patch"))
-        elif name == "read_file":
-            return self.reader.read_file(args.get("file"))
-        elif name == "search_web":
-            from web.research import WebResearcher
-            researcher = WebResearcher()
-            results = researcher.search(args.get("query", ""))
-            return json.dumps(results[:5])
-        elif name == "run_tests":
-            return json.dumps(self.runner.run_tests())
-        elif name == "git_checkpoint":
-            return self.git.checkpoint(args.get("message", "checkpoint"))
-        elif name == "git_rollback":
-            return self.git.rollback()
-        else:
-            return f"Unknown tool: {name}"
+        try:
+            if name == "patch_code":
+                self.writer.write_file(args.get("file"), args.get("patch"))
+                return f"Patched {args.get('file', 'unknown')}"
+            elif name == "read_file":
+                return self.reader.read_file(args.get("file", "")) or "File empty or not found"
+            elif name == "search_web":
+                from web.research import WebResearcher
+                researcher = WebResearcher()
+                results = researcher.search(args.get("query", ""))
+                return json.dumps(results[:5]) if results else "No results"
+            elif name == "run_tests":
+                return json.dumps(self.runner.run_tests())
+            elif name == "git_checkpoint":
+                return self.git.checkpoint(args.get("message", "checkpoint")) or "Checkpoint created"
+            elif name == "git_rollback":
+                return self.git.rollback() or "Rolled back"
+            else:
+                return f"Unknown tool: {name}"
+        except Exception as e:
+            return f"Tool error ({name}): {e}"
 
     def initialize_cycle(self):
         """Initialize the cycle by setting up the git repository."""
@@ -229,11 +233,13 @@ class ForgemindAgent:
                 console.print(f"  [dim]-> {fn_name}({list(fn_args.keys())})[/dim]")
 
                 result = await self._execute_tool(fn_name, fn_args)
+                if result is None:
+                    result = "Tool returned no output"
 
                 self.messages.append({
                     "role": "tool",
                     "tool_call_id": tc.id,
-                    "content": result,
+                    "content": str(result),
                 })
 
                 if fn_name == "run_tests":
