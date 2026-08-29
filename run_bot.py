@@ -8,6 +8,7 @@ Falls back to long-polling when running locally or if webhook fails.
 import os
 import time
 import json
+import threading
 import httpx
 from flask import Flask, request, jsonify
 
@@ -175,6 +176,42 @@ def health():
 @app.route("/health", methods=["GET"])
 def health_alt():
     return jsonify({"status": "ok"})
+
+
+@app.route("/cycle", methods=["POST", "GET"])
+def cycle():
+    """Endpoint for the FORGEMIND mobile app — returns live stats and kicks off a background cycle."""
+    try:
+        from memory.store import MemoryStore
+        mem = MemoryStore()
+        imps = mem.data.get("improvements", [])
+        total = len(imps)
+        successes = sum(1 for i in imps if i.get("success"))
+        rate = round(successes / total, 2) if total else 0.0
+
+        def _bg_cycle():
+            try:
+                import asyncio
+                import yaml
+                from core.agent import ForgemindAgent
+                config = {}
+                if os.path.exists("config.yaml"):
+                    config = yaml.safe_load(open("config.yaml").read()) or {}
+                agent = ForgemindAgent(config, root=".")
+                asyncio.run(agent.run_cycle())
+            except Exception as e:
+                print(f"[cycle] background run failed: {e}")
+
+        threading.Thread(target=_bg_cycle, daemon=True).start()
+
+        return jsonify({
+            "improvements": total,
+            "success_rate": rate,
+            "iterations": total,
+            "status": "cycle started - check back in a bit",
+        })
+    except Exception as e:
+        return jsonify({"error": str(e), "improvements": 0, "success_rate": 0, "iterations": 0}), 200
 
 
 def setup_webhook():
