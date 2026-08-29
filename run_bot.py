@@ -61,6 +61,8 @@ def handle(cmd, args, cid):
             "/build — APK build\n"
             "/apk — latest APK\n"
             "/diag — self-diagnostic\n"
+            "/render — Render status\n"
+            "/redeploy — trigger redeploy\n"
             "/report <text> — bug or idea"
         ))
     if cmd == "/apk":
@@ -88,9 +90,35 @@ def handle(cmd, args, cid):
         return send(cid, "FORGEMIND online (Render)\nCycle: every 2h\nAPK: auto-build\nMode: webhook" if RENDER_URL else "Mode: polling")
     if cmd == "/diag":
         return run_diagnostic(cid)
+    if cmd == "/render":
+        return run_render_status(cid)
+    if cmd == "/redeploy":
+        return run_redeploy(cid)
     if cmd == "/report":
         return send(cid, f"Saved: {args[:100]}" if args else "Usage: /report <text>")
     return send(cid, "Unknown. /help")
+
+
+def run_render_status(cid):
+    """Check Render service status."""
+    try:
+        from tools.render_ops import RenderOps
+        ops = RenderOps()
+        status = ops.status()
+        return send(cid, f"🖥 Render Status\n{status}")
+    except Exception as e:
+        return send(cid, f"Render error: {e}")
+
+
+def run_redeploy(cid):
+    """Trigger redeploy on Render."""
+    try:
+        from tools.render_ops import RenderOps
+        ops = RenderOps()
+        result = ops.redeploy(clear_cache=True)
+        return send(cid, f"🔄 {result}")
+    except Exception as e:
+        return send(cid, f"Redeploy error: {e}")
 
 
 def run_diagnostic(cid):
