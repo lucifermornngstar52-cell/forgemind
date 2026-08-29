@@ -258,6 +258,42 @@
       "name": "Function Calling LLM Best Practices: Complete 2026 Guide",
       "source": "web_search",
       "summary": "FunctionCallingLLMBest Practices: The Complete2026GuideFunctioncalling(also called tool use or plugin capabilities) transformsLLMsfrom chat interfaces into action-takingagents. Instead of just generat"
+    },
+    {
+      "timestamp": "2026-08-29T05:14:11.121658",
+      "name": "The Architecture Behind Self-Improving AI Agents (Full ... - Medium",
+      "source": "web_search",
+      "summary": "This framework demonstrates how anAIagentcan continuously improve its responses using a feedback-driven learning loop. The framework introduces a simple but powerfularchitecture. Instead of a ..."
+    },
+    {
+      "timestamp": "2026-08-29T05:14:12.871740",
+      "name": "AI Agent Skill Acquisition and Self-Improvement Architectures",
+      "source": "web_search",
+      "summary": "Prompt injection vectors were discovered in skills that accept user-provided text and embed it into downstream tool calls ... OWASP Top 10 for Agentic Applications (December2025) is the first formal t"
+    },
+    {
+      "timestamp": "2026-08-29T05:14:13.045879",
+      "name": "The 2026 State of AI in QA: LLMs & Autonomous Testing Agents",
+      "source": "web_search",
+      "summary": "Discover2026'stop softwaretestingtrends. Learn how Meta, Wayfair, and finance leaders use LLMs andautonomousAIagentsto close the QA efficiency gap."
+    },
+    {
+      "timestamp": "2026-08-29T05:14:13.224020",
+      "name": "Awesome AI Agent Testing - GitHub",
+      "source": "web_search",
+      "summary": "AwesomeAIAgentTestingA comprehensive, curated list of resources fortestingAIagents, including frameworks, methodologies, benchmarks, tools, and best practices.AIagentsareautonomoussystems that perceiv"
+    },
+    {
+      "timestamp": "2026-08-29T05:14:13.400427",
+      "name": "LLM Function Calling and Tool Use Guide 2026: OpenAI, Anthropic, Google",
+      "source": "web_search",
+      "summary": "Complete2026guide toLLMfunctioncallingacross OpenAI, Anthropic, and Google Gemini—with code, security, and production patterns."
+    },
+    {
+      "timestamp": "2026-08-29T05:14:13.573262",
+      "name": "Function Calling LLM Best Practices: Complete 2026 Guide",
+      "source": "web_search",
+      "summary": "FunctionCallingLLMBest Practices: The Complete2026GuideFunctioncalling(also called tool use or plugin capabilities) transformsLLMsfrom chat interfaces into action-takingagents. Instead of just generat"
     }
   ],
   "metrics": {}
