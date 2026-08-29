@@ -35,6 +35,25 @@ Rules:
    partial snippet. The tool overwrites the whole file with exactly what you send.
    Always read_file first to get the current full content, then send back the full
    modified version.
+
+YOUR CYCLE HAS THREE PHASES — follow them in order:
+
+PHASE 1 — RESEARCH (iterations 1-3):
+  Use search_web to find best practices, techniques, and architectures for the
+  topics provided. Read multiple sources. Gather as much knowledge as you can.
+  Do NOT write any code in this phase. Just learn.
+
+PHASE 2 — THINK (iterations 4-5):
+  Analyze what you learned. Think about how to apply it to YOUR codebase.
+  Consider: What is the highest-impact change? What could break? What's the
+  safest improvement? Plan your approach. Do NOT write code yet.
+
+PHASE 3 — PATCH (iterations 6-10):
+  Now make ONE focused change. read_file → patch_code → run_tests.
+  If tests pass, report success. If tests fail, git_rollback and try a
+  different approach.
+
+Skip phases only if you already have enough context from the research provided.
 """
 
 TOOLS = [
@@ -201,9 +220,12 @@ class ForgemindAgent:
                 f"Improvement plan: {json.dumps(plan, indent=2)[:2000]}\n\n"
                 f"Memory: {memory_summary}\n\n"
                 f"Semantic context (past experiences): {semantic_context[:1500]}\n\n"
-                f"Begin improving yourself. Start with the highest-priority item. "
-                f"Make ONE change, run tests, then report what you improved. "
-                f"Use research tools if you need to learn new techniques."
+                f"Research findings (study these BEFORE writing code):\n"
+                f"{getattr(self, '_research_summary', 'No research conducted this cycle.')[:4000]}\n\n"
+                f"Follow your three phases: RESEARCH → THINK → PATCH. "
+                f"Study the research findings above, think about how to apply them, "
+                f"then make ONE focused change. read_file → patch_code → run_tests. "
+                f"Use search_web if you need to learn more before patching."
             )},
         ]
 
@@ -292,15 +314,38 @@ class ForgemindAgent:
         }
 
     async def research_and_learn(self) -> dict:
-        """Research external techniques and learn from them."""
-        console.print("[magenta]Researching external techniques...[/magenta]")
+        """Deep research: search web, fetch articles, build knowledge base."""
+        console.print("[bold magenta]═══ Phase 1: Research ═══[/bold magenta]")
+
         from web.research import WebResearcher
         researcher = WebResearcher()
-        techniques = researcher.search("best practices for autonomous AI agents python 2024 2025")
-        for tech in techniques[:5]:
-            self.memory.add_technique(
-                name=tech.get("title", "unknown"),
-                source="web_search",
-                summary=tech.get("snippet", str(tech)[:200])
-            )
-        return {"techniques_learned": len(techniques)}
+
+        # Research topics relevant to self-improving AI agents
+        topics = [
+            "self-improving AI agent architecture",
+            "python code analysis best practices 2025",
+            "autonomous agent testing strategies",
+            "LLM function calling optimization",
+            "AI agent memory systems vector db",
+        ]
+
+        console.print(f"  Researching {len(topics)} topics...")
+        knowledge = researcher.deep_research(topics)
+
+        # Save techniques to memory
+        tech_count = 0
+        for topic, data in knowledge.items():
+            for result in data.get("search_results", [])[:2]:
+                self.memory.add_technique(
+                    name=result.get("title", "unknown")[:100],
+                    source="web_search",
+                    summary=result.get("snippet", str(result))[:200]
+                )
+                tech_count += 1
+
+        # Build research summary for the agent
+        self._research_summary = researcher.summarize_findings()
+        console.print(f"  Learned {tech_count} techniques")
+        console.print(f"  Research summary: {len(self._research_summary)} chars")
+
+        return {"techniques_learned": tech_count, "summary": self._research_summary}
