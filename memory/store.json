@@ -186,6 +186,42 @@
       "name": "Tool Use and Function Calling in AI Agents - zylos.ai",
       "source": "web_search",
       "summary": "A comprehensive analysis of the current state of tool/functioncallingacross majorLLMproviders, standardization efforts led by MCP, benchmark landscapes, emerging patterns like parallel tool calls and "
+    },
+    {
+      "timestamp": "2026-08-29T04:55:31.308793",
+      "name": "The Architecture Behind Self-Improving AI Agents (Full ... - Medium",
+      "source": "web_search",
+      "summary": "This framework demonstrates how anAIagentcan continuously improve its responses using a feedback-driven learning loop. The framework introduces a simple but powerfularchitecture. Instead of a ..."
+    },
+    {
+      "timestamp": "2026-08-29T04:55:32.935432",
+      "name": "Self-Improving Loop: How to Build AI Agents That Actually Learn",
+      "source": "web_search",
+      "summary": "Learn how to buildself-improvingAIagentsthat don't repeat mistakes. This guide explains thearchitecturewith a tutorial inPython."
+    },
+    {
+      "timestamp": "2026-08-29T04:55:33.087166",
+      "name": "Awesome AI Agent Testing - GitHub",
+      "source": "web_search",
+      "summary": "AwesomeAIAgentTestingA comprehensive, curated list of resources fortestingAIagents, including frameworks, methodologies, benchmarks, tools, and best practices.AIagentsareautonomoussystems that perceiv"
+    },
+    {
+      "timestamp": "2026-08-29T04:55:33.266817",
+      "name": "GitHub - VoltAgent/awesome-ai-agent-papers: A curated collection of AI ...",
+      "source": "web_search",
+      "summary": "A curated collection ofAIagentresearch papers released in2026, coveringagentengineering, memory, evaluation, workflows, andautonomoussystems. - VoltAgent/awesome-ai-agent-papers"
+    },
+    {
+      "timestamp": "2026-08-29T04:55:33.461532",
+      "name": "Function Calling LLM Best Practices: Complete 2026 Guide",
+      "source": "web_search",
+      "summary": "FunctionCallingLLMBest Practices: The Complete2026GuideFunctioncalling(also called tool use or plugin capabilities) transformsLLMsfrom chat interfaces into action-takingagents. Instead of just generat"
+    },
+    {
+      "timestamp": "2026-08-29T04:55:33.745556",
+      "name": "Function Calling LLM Best Practices Guide 2026 | AI Agents Plus",
+      "source": "web_search",
+      "summary": "Learn production-ready best practices forfunctioncallingin large language models. Security, performance, and reliability tips forAIdevelopers."
     }
   ],
   "metrics": {}
