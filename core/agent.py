@@ -1,15 +1,116 @@
-# ... (previous code remains unchanged)
+"""FORGEMIND Agent — the mind that forges itself.
+
+This module is the core of the FORGEMIND self-improving agent.
+Each cycle: read code → find weaknesses → plan → patch → test → commit/rollback.
+"""
+
+import json
+from rich.console import Console
+
+from core.llm import LLM
+from core.planner import Planner
+from tools.reader import CodeReader
+from tools.writer import CodeWriter
+from tools.runner import Runner
+from tools.git_ops import GitOps
+from memory.store import MemoryStore
+
+console = Console()
+
+AGENT_SYSTEM = """You are FORGEMIND — a self-improving AI agent that modifies its own source code.
+
+Your mission: become the best autonomous AI agent possible.
+
+Rules:
+1. Make ONE change per iteration, then run tests
+2. If tests fail, the safety system will rollback automatically
+3. Prioritize: bug fixes > test coverage > performance > new features > refactoring
+4. Never delete or stub out imports — they are critical
+5. Never replace code with comments like "# ... unchanged"
+6. Keep changes small and focused
+7. Document what you changed and why
+"""
+
+TOOLS = [
+    {
+        "type": "function",
+        "function": {
+            "name": "patch_code",
+            "description": "Apply a patch to a source file",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "file": {"type": "string", "description": "File path to patch"},
+                    "patch": {"type": "string", "description": "The new file content or unified diff"},
+                },
+                "required": ["file", "patch"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "read_file",
+            "description": "Read a file's contents",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "file": {"type": "string", "description": "File path to read"},
+                },
+                "required": ["file"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "search_web",
+            "description": "Search the web for techniques and best practices",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {"type": "string", "description": "Search query"},
+                },
+                "required": ["query"],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "run_tests",
+            "description": "Run the test suite and return results",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "git_checkpoint",
+            "description": "Create a git checkpoint (commit)",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "message": {"type": "string", "description": "Commit message"},
+                },
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "git_rollback",
+            "description": "Rollback to previous checkpoint",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
+]
+
 
 class ForgemindAgent:
     """The mind that forges itself. Each cycle makes it better."""
 
     def __init__(self, config: dict, root: str = "."):
-        """
-        Initialize the ForgemindAgent.
-
-        :param config: Configuration dictionary for the agent.
-        :param root: Root directory for the agent's operations.
-        """
         self.config = config
         self.root = root
         self.llm = LLM(config.get("llm", {}))
@@ -29,13 +130,16 @@ class ForgemindAgent:
     async def _execute_tool(self, name: str, args: dict) -> str:
         """Execute a tool by name with given arguments."""
         if name == "patch_code":
-            return self.hands.apply_patch(args.get("file"), args.get("patch"))
+            return self.writer.write_file(args.get("file"), args.get("patch"))
         elif name == "read_file":
             return self.reader.read_file(args.get("file"))
         elif name == "search_web":
-            return self.eyes.search(args.get("query", ""))
+            from web.research import WebResearcher
+            researcher = WebResearcher()
+            results = researcher.search(args.get("query", ""))
+            return json.dumps(results[:5])
         elif name == "run_tests":
-            return self.mirror.run_tests()
+            return json.dumps(self.runner.run_tests())
         elif name == "git_checkpoint":
             return self.git.checkpoint(args.get("message", "checkpoint"))
         elif name == "git_rollback":
@@ -44,7 +148,7 @@ class ForgemindAgent:
             return f"Unknown tool: {name}"
 
     def initialize_cycle(self):
-        """Initialize the cycle by setting up the git repository and preparing the console."""
+        """Initialize the cycle by setting up the git repository."""
         console.print("\n[bold cyan]═══ Forgemind Cycle Start ═══[/bold cyan]\n")
         self.git.init()
 
@@ -67,7 +171,7 @@ class ForgemindAgent:
         plan = self.planner.create_plan(structure, weaknesses, memory_summary)
         console.print(f"  Plan: {len(plan)} steps")
 
-        # Step 4: Get semantic context for the plan
+        # Step 4: Get semantic context
         semantic_context = ""
         if plan:
             first_action = plan[0].get("action", "improvement")
@@ -101,7 +205,7 @@ class ForgemindAgent:
             response = self.llm.chat(self.messages, tools=TOOLS)
 
             assistant_msg = {"role": "assistant", "content": response["content"]}
-            if response["tool_calls"]:
+            if response.get("tool_calls"):
                 assistant_msg["tool_calls"] = [
                     {
                         "id": tc.id,
@@ -115,7 +219,7 @@ class ForgemindAgent:
                 ]
             self.messages.append(assistant_msg)
 
-            if not response["tool_calls"]:
+            if not response.get("tool_calls"):
                 console.print(f"[green]Agent finished: {response['content'][:300]}[/green]")
                 break
 
@@ -178,7 +282,9 @@ class ForgemindAgent:
     async def research_and_learn(self) -> dict:
         """Research external techniques and learn from them."""
         console.print("[magenta]Researching external techniques...[/magenta]")
-        techniques = await self.eyes.search("best practices for autonomous AI agents python 2024 2025")
+        from web.research import WebResearcher
+        researcher = WebResearcher()
+        techniques = researcher.search("best practices for autonomous AI agents python 2024 2025")
         for tech in techniques[:5]:
             self.memory.add_technique(
                 name=tech.get("title", "unknown"),
@@ -186,4 +292,3 @@ class ForgemindAgent:
                 summary=tech.get("snippet", str(tech)[:200])
             )
         return {"techniques_learned": len(techniques)}
-
