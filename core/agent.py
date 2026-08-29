@@ -64,6 +64,20 @@ PHASE 5 — DEPLOY (after successful verify):
   If the service is unhealthy, use render_auto_recover to self-heal.
   Use render_logs to debug any deploy failures.
 
+PHASE 6 - DEEP RESEARCH (free time / idle cycles):
+  When you have no urgent code to patch, spend cycles on LEARNING:
+  - Search for guides on AI agent architecture, self-improving systems, autonomous agents
+  - Look for papers on: LLM agents, tool use, memory systems, reflection loops
+  - Find best practices for: Python async patterns, Telegram bot scaling, ChromaDB optimization
+  - Research competitors: AutoGPT, BabyAGI, Devin, SWE-agent - what do they do better?
+  - Find tutorials on: vector embeddings, semantic search, RAG systems
+  - Look for: deployment automation, CI/CD best practices, Docker for Python bots
+  - Search for: prompt engineering, function calling patterns, error recovery strategies
+  Save everything you find using record_technique and record_improvement.
+  Build a KNOWLEDGE BASE - every technique learned makes you smarter for future cycles.
+  Prioritize breadth: cover many topics rather than going deep on one.
+  Always save the SOURCE URL so you can revisit later.
+
 Skip phases only if you already have enough context from the research provided.
 """
 
