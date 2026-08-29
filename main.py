@@ -30,7 +30,7 @@ def load_config() -> dict:
     return {}
 
 
-async def run_cycle(research: bool = False) -> dict:
+async def run_cycle(research: bool = False, deep: bool = False) -> dict:
     """Execute one improvement cycle of the FORGEMIND agent."""
     from core.agent import ForgemindAgent
     config = load_config()
@@ -38,14 +38,14 @@ async def run_cycle(research: bool = False) -> dict:
     if research:
         console.print("[bold magenta]Phase 0: Researching external techniques...[/bold magenta]")
         await agent.research_and_learn()
-    return await agent.run_cycle()
+    return await agent.run_cycle(deep_research=deep)
 
 
-async def run_loops(count: int, research: bool = False) -> None:
+async def run_loops(count: int, research: bool = False, deep: bool = False) -> None:
     """Run multiple improvement cycles."""
     for i in range(count):
         console.print(f"\n[bold blue]═══════ CYCLE {i+1}/{count} ═══════[/bold blue]")
-        result = await run_cycle(research=(research and i == 0))
+        result = await run_cycle(research=(research and i == 0), deep=deep)
         if result["success_rate"] > 0 and result["success_rate"] < 0.3:
             console.print("[bold red]Success rate too low. Stopping for safety.[/bold red]")
             break
@@ -110,6 +110,7 @@ def main():
     """Main entry point for the FORGEMIND AI agent."""
     parser = argparse.ArgumentParser(description="FORGEMIND — Self-Improving AI Agent")
     parser.add_argument("--research", action="store_true", help="Research techniques before improving")
+    parser.add_argument("--deep", action="store_true", help="Deep research mode: gather guides, papers, best practices")
     parser.add_argument("--loop", type=int, default=1, help="Number of cycles to run")
     parser.add_argument("--status", action="store_true", help="Show status and exit")
     parser.add_argument("--build-apk", action="store_true", help="Package self into an Android APK")
