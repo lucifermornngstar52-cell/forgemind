@@ -402,6 +402,42 @@
       "name": "Tool Calling Explained: Turn Your LLM into an AI Agent",
       "source": "web_search",
       "summary": "Toolcalling(functioncalling) is the bridge that transforms staticLLMsintoautonomousagentscapable of invoking external APIs, databases, and services. Learn the six-step process that powers ChatGPT plug"
+    },
+    {
+      "timestamp": "2026-08-29T19:15:44.983282",
+      "name": "The Architecture Behind Self-Improving AI Agents (Full ... - Medium",
+      "source": "web_search",
+      "summary": "This framework demonstrates how anAIagentcan continuously improve its responses using a feedback-driven learning loop. The framework introduces a simple but powerfularchitecture. Instead of a ..."
+    },
+    {
+      "timestamp": "2026-08-29T19:15:46.623782",
+      "name": "Self-Improving Loop: How to Build AI Agents That Actually Learn",
+      "source": "web_search",
+      "summary": "Learn how to buildself-improvingAIagentsthat don't repeat mistakes. This guide explains thearchitecturewith a tutorial inPython."
+    },
+    {
+      "timestamp": "2026-08-29T19:15:46.868904",
+      "name": "Awesome AI Agent Testing - GitHub",
+      "source": "web_search",
+      "summary": "AwesomeAIAgentTestingA comprehensive, curated list of resources fortestingAIagents, including frameworks, methodologies, benchmarks, tools, and best practices.AIagentsareautonomoussystems that perceiv"
+    },
+    {
+      "timestamp": "2026-08-29T19:15:47.104150",
+      "name": "The AI Agent Stack 2026: Architecting Autonomous Systems with Python",
+      "source": "web_search",
+      "summary": "In2026, building anAIapplication is no longer about simple prompt engineering. It is about architecting a \"Stack\" that allowsPythonagentsto reason, use tools, and maintain memory."
+    },
+    {
+      "timestamp": "2026-08-29T19:15:47.339957",
+      "name": "LLM Function Calling and Tool Use Guide 2026: OpenAI, Anthropic, Google",
+      "source": "web_search",
+      "summary": "Complete2026guide toLLMfunctioncallingacross OpenAI, Anthropic, and Google Gemini—with code, security, and production patterns."
+    },
+    {
+      "timestamp": "2026-08-29T19:15:47.521728",
+      "name": "Function Calling LLM Best Practices: Complete 2026 Guide",
+      "source": "web_search",
+      "summary": "FunctionCallingLLMBest Practices: The Complete2026GuideFunctioncalling(also called tool use or plugin capabilities) transformsLLMsfrom chat interfaces into action-takingagents. Instead of just generat"
     }
   ],
   "metrics": {}
