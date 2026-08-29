@@ -53,6 +53,11 @@ PHASE 3 — PATCH (iterations 6-10):
   If tests pass, report success. If tests fail, git_rollback and try a
   different approach.
 
+PHASE 4 — VERIFY (after patching):
+  Run self_diagnostic to verify your change didn't break anything.
+  If the diagnostic reports syntax errors or test failures, rollback
+  immediately with git_rollback.
+
 Skip phases only if you already have enough context from the research provided.
 """
 
@@ -129,6 +134,14 @@ TOOLS = [
             "parameters": {"type": "object", "properties": {}},
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "self_diagnostic",
+            "description": "Run a full self-diagnostic: syntax check, test suite, loop detection, git health, memory integrity. Returns a health report. Use this BEFORE making changes to know your current state, and AFTER changes to verify nothing broke.",
+            "parameters": {"type": "object", "properties": {}},
+        },
+    },
 ]
 
 
@@ -171,6 +184,11 @@ class ForgemindAgent:
                 return self.git.checkpoint(args.get("message", "checkpoint")) or "Checkpoint created"
             elif name == "git_rollback":
                 return self.git.rollback() or "Rolled back"
+            elif name == "self_diagnostic":
+                from core.diagnostic import SelfDiagnostic
+                diag = SelfDiagnostic(root=self.root)
+                results = diag.run_full_check()
+                return json.dumps(results, indent=2)
             else:
                 return f"Unknown tool: {name}"
         except Exception as e:
