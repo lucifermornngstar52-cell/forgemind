@@ -10,6 +10,7 @@ import time
 import json
 import threading
 import httpx
+import yaml
 from flask import Flask, request, jsonify
 
 TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "")
@@ -159,9 +160,17 @@ def webhook():
         text = (message.get("text") or "").strip()
         chat_id = message.get("chat", {}).get("id")
         if text and chat_id:
-            p = text.split(maxsplit=1)
-            print(f"[{chat_id}] {p[0]}")
-            handle(p[0], p[1] if len(p) > 1 else "", chat_id)
+            if text.startswith("/"):
+                p = text.split(maxsplit=1)
+                print(f"[{chat_id}] {p[0]}")
+                handle(p[0], p[1] if len(p) > 1 else "", chat_id)
+            else:
+                print(f"[{chat_id}] chat: {text[:40]}")
+                try:
+                    reply = _chat_reply(text, [])
+                except Exception as e:
+                    reply = f"(brain error: {e})"
+                send(chat_id, reply)
     except Exception as e:
         print(f"Webhook error: {e}")
     return jsonify({"ok": True})
@@ -212,6 +221,65 @@ def cycle():
         })
     except Exception as e:
         return jsonify({"error": str(e), "improvements": 0, "success_rate": 0, "iterations": 0}), 200
+
+
+def _load_llm_config():
+    cfg = {}
+    if os.path.exists("config.yaml"):
+        cfg = yaml.safe_load(open("config.yaml").read()) or {}
+    return cfg.get("llm", {"model": "gpt-4o-mini", "temperature": 0.5, "max_tokens": 600})
+
+
+def _chat_reply(user_text: str, history: list) -> str:
+    """Generate a conversational reply from FORGEMIND's brain (GPT-4o-mini)."""
+    from core.llm import LLM
+    from memory.store import MemoryStore
+
+    llm_cfg = _load_llm_config()
+    llm_cfg = {**llm_cfg, "max_tokens": min(llm_cfg.get("max_tokens", 4096), 700)}
+    llm = LLM(llm_cfg)
+
+    mem = MemoryStore()
+    imps = mem.data.get("improvements", [])
+    techs = mem.data.get("techniques_learned", [])
+    total = len(imps)
+    successes = sum(1 for i in imps if i.get("success"))
+    rate = round(successes / total, 2) if total else 0.0
+
+    system = (
+        "You are FORGEMIND, an autonomous self-improving AI agent. "
+        "You run continuous research -> code -> deploy cycles every 2 hours on your own GitHub repo, "
+        "rebuild your Android APK automatically, and learn new techniques from web research. "
+        f"Current stats: {total} improvements logged, {successes} successful ({rate:.0%} success rate), "
+        f"{len(techs)} techniques learned so far. "
+        "You are chatting directly with your creator inside your own mobile app. "
+        "Be direct, a little witty, technically sharp. Reply in the same language the user writes in "
+        "(Russian or English). Keep replies short and mobile-friendly (2-5 sentences) unless asked for detail."
+    )
+
+    messages = [{"role": "system", "content": system}]
+    for h in (history or [])[-8:]:
+        role = "user" if h.get("role") == "user" else "assistant"
+        messages.append({"role": role, "content": h.get("content", "")[:2000]})
+    messages.append({"role": "user", "content": user_text[:2000]})
+
+    resp = llm.chat(messages)
+    return resp.get("content") or "..."
+
+
+@app.route("/chat", methods=["POST"])
+def chat_endpoint():
+    """Real chat endpoint for the FORGEMIND mobile app."""
+    try:
+        body = request.get_json(force=True) or {}
+        user_text = (body.get("message") or "").strip()
+        history = body.get("history") or []
+        if not user_text:
+            return jsonify({"error": "empty message"}), 400
+        reply = _chat_reply(user_text, history)
+        return jsonify({"reply": reply})
+    except Exception as e:
+        return jsonify({"reply": f"(error talking to my brain: {e})"}), 200
 
 
 def setup_webhook():
