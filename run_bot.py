@@ -21,7 +21,6 @@ OWNER_CHAT_ID = 7500697130
 app = Flask(__name__)
 OFFSET = 0
 
-
 def tg(method, **kw):
     """Send a request to the Telegram Bot API."""
     with httpx.Client(timeout=15) as c:
@@ -148,10 +147,10 @@ def run_diagnostic(cid):
     except Exception as e:
         return send(cid, f"Diagnostic failed: {e}")
 
-
 # === WEBHOOK MODE ===
 
 @app.route(f"/webhook/{TOKEN}", methods=["POST"])
+
 def webhook():
     """Handle webhook updates from Telegram."""
     try:
@@ -175,19 +174,19 @@ def webhook():
         print(f"Webhook error: {e}")
     return jsonify({"ok": True})
 
-
 @app.route("/", methods=["GET"])
+
 def health():
     """Health check endpoint for Render."""
     return jsonify({"status": "ok", "bot": "FORGEMIND", "mode": "webhook" if RENDER_URL else "polling"})
 
-
 @app.route("/health", methods=["GET"])
 def health_alt():
+    """Health check endpoint for Render."""
     return jsonify({"status": "ok"})
 
-
 @app.route("/cycle", methods=["POST", "GET"])
+
 def cycle():
     """Endpoint for the FORGEMIND mobile app — returns live stats and kicks off a background cycle."""
     try:
@@ -199,6 +198,7 @@ def cycle():
         rate = round(successes / total, 2) if total else 0.0
 
         def _bg_cycle():
+            """Background cycle for self-improvement."""
             try:
                 import asyncio
                 import yaml
@@ -224,6 +224,7 @@ def cycle():
 
 
 def _load_llm_config():
+    """Load LLM configuration from config.yaml."""
     cfg = {}
     if os.path.exists("config.yaml"):
         cfg = yaml.safe_load(open("config.yaml").read()) or {}
@@ -266,8 +267,8 @@ def _chat_reply(user_text: str, history: list) -> str:
     resp = llm.chat(messages)
     return resp.get("content") or "..."
 
-
 @app.route("/chat", methods=["POST"])
+
 def chat_endpoint():
     """Real chat endpoint for the FORGEMIND mobile app."""
     try:

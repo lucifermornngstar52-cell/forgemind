@@ -113,7 +113,71 @@
       "details": "Tests passed after change"
     }
   ],
-  "failures": [],
+  "failures": [
+    {
+      "timestamp": "2026-08-30T02:43:12.140843",
+      "description": "Iteration 4",
+      "file": "multiple",
+      "success": false,
+      "details": "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python: No module named pytest\n"
+    },
+    {
+      "timestamp": "2026-08-30T02:43:21.271077",
+      "description": "Iteration 9",
+      "file": "multiple",
+      "success": false,
+      "details": "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python: No module named pytest\n"
+    },
+    {
+      "timestamp": "2026-08-30T02:43:50.938400",
+      "description": "Iteration 3",
+      "file": "multiple",
+      "success": false,
+      "details": "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python: No module named pytest\n"
+    },
+    {
+      "timestamp": "2026-08-30T02:43:52.573777",
+      "description": "Iteration 5",
+      "file": "multiple",
+      "success": false,
+      "details": "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python: No module named pytest\n"
+    },
+    {
+      "timestamp": "2026-08-30T02:44:28.861861",
+      "description": "Iteration 4",
+      "file": "multiple",
+      "success": false,
+      "details": "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python: No module named pytest\n"
+    },
+    {
+      "timestamp": "2026-08-30T02:44:30.725610",
+      "description": "Iteration 6",
+      "file": "multiple",
+      "success": false,
+      "details": "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python: No module named pytest\n"
+    },
+    {
+      "timestamp": "2026-08-30T02:45:06.008287",
+      "description": "Iteration 4",
+      "file": "multiple",
+      "success": false,
+      "details": "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python: No module named pytest\n"
+    },
+    {
+      "timestamp": "2026-08-30T02:45:56.047127",
+      "description": "Iteration 3",
+      "file": "multiple",
+      "success": false,
+      "details": "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python: No module named pytest\n"
+    },
+    {
+      "timestamp": "2026-08-30T02:46:26.179001",
+      "description": "Iteration 8",
+      "file": "multiple",
+      "success": false,
+      "details": "/opt/hostedtoolcache/Python/3.12.14/x64/bin/python: No module named pytest\n"
+    }
+  ],
   "techniques_learned": [
     {
       "timestamp": "2026-08-29T02:51:42.898572",
@@ -510,6 +574,42 @@
       "name": "LLM Function Calling and Tool Use Guide 2026: OpenAI, Anthropic, Google",
       "source": "web_search",
       "summary": "Complete2026guide toLLMfunctioncallingacross OpenAI, Anthropic, and Google Gemini—with code, security, and production patterns."
+    },
+    {
+      "timestamp": "2026-08-30T02:42:36.048302",
+      "name": "The Architecture Behind Self-Improving AI Agents (Full ... - Medium",
+      "source": "web_search",
+      "summary": "This framework demonstrates how anAIagentcan continuously improve its responses using a feedback-driven learning loop. The framework introduces a simple but powerfularchitecture. Instead of a ..."
+    },
+    {
+      "timestamp": "2026-08-30T02:42:38.493736",
+      "name": "Self-Improving Loop: How to Build AI Agents That Actually Learn",
+      "source": "web_search",
+      "summary": "Learn how to buildself-improvingAIagentsthat don't repeat mistakes. This guide explains thearchitecturewith a tutorial inPython."
+    },
+    {
+      "timestamp": "2026-08-30T02:42:38.668324",
+      "name": "Awesome AI Agent Testing - GitHub",
+      "source": "web_search",
+      "summary": "AwesomeAIAgentTestingA comprehensive, curated list of resources fortestingAIagents, including frameworks, methodologies, benchmarks, tools, and best practices.AIagentsareautonomoussystems that perceiv"
+    },
+    {
+      "timestamp": "2026-08-30T02:42:38.843965",
+      "name": "AI Agent Evaluation Frameworks 2026: How Autonomous Systems Are Being ...",
+      "source": "web_search",
+      "summary": "AsAIagentstransition from experimental tools to production workloads, the need for rigorous evaluation frameworks has never been more critical. This comprehensive analysis explores the emerging standa"
+    },
+    {
+      "timestamp": "2026-08-30T02:42:39.017799",
+      "name": "Tool Calling Explained: Turn Your LLM into an AI Agent",
+      "source": "web_search",
+      "summary": "Toolcalling(functioncalling) is the bridge that transforms staticLLMsintoautonomousagentscapable of invoking external APIs, databases, and services. Learn the six-step process that powers ChatGPT plug"
+    },
+    {
+      "timestamp": "2026-08-30T02:42:39.200541",
+      "name": "Function Calling LLM Best Practices: Complete 2026 Guide",
+      "source": "web_search",
+      "summary": "FunctionCallingLLMBest Practices: The Complete2026GuideFunctioncalling(also called tool use or plugin capabilities) transformsLLMsfrom chat interfaces into action-takingagents. Instead of just generat"
     }
   ],
   "metrics": {}

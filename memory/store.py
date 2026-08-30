@@ -1,5 +1,4 @@
-"""
-Memory store — persistent memory with Base44 database + vector memory.
+"""Memory store — persistent memory with Base44 database + vector memory.
 
 Two layers:
 1. Base44 Entities (cloud DB) — permanent, queryable, cross-session
