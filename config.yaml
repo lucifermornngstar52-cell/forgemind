@@ -1,5 +1,7 @@
 llm:
-  model: gpt-4o-mini
+  # Primary: Ollama with local open-source model (fully independent, no API key)
+  # Fallback: OpenAI (set OPENAI_PROJECT_KEY env var)
+  model: qwen2.5:3b
   temperature: 0.3
   max_tokens: 4096
 
