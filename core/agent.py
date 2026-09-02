@@ -227,6 +227,32 @@ class ForgemindAgent:
         self.messages = []
         self.consecutive_failures = 0
 
+    def _parse_text_tools(self, text: str) -> list:
+        """Parse text-based tool calls when function calling is unavailable.
+        
+        Recognizes patterns like:
+        ACTION: patch_code(file="path.py", patch="content...")
+        ACTION: read_file(file="path.py")
+        ACTION: run_tests()
+        ACTION: search_web(query="...")
+        ACTION: git_checkpoint(message="...")
+        """
+        import re
+        results = []
+        pattern = r'(?:ACTION|TOOL|CALL):\s*(\w+)\s*\((.*?)\)'
+        matches = re.findall(pattern, text, re.IGNORECASE)
+        
+        for fn_name, args_str in matches:
+            fn_name = fn_name.lower().strip()
+            fn_args = {}
+            # Parse key="value" or key='value' pairs
+            arg_pattern = r'(\w+)\s*=\s*["\'](.*?)["\']'
+            for key, val in re.findall(arg_pattern, args_str):
+                fn_args[key] = val
+            results.append((fn_name, fn_args))
+        
+        return results
+
     async def _execute_tool(self, name: str, args: dict) -> str:
         """Execute a tool by name with given arguments."""
         try:
@@ -349,8 +375,46 @@ class ForgemindAgent:
             self.messages.append(assistant_msg)
 
             if not response.get("tool_calls"):
-                console.print(f"[green]Agent finished: {response['content'][:300]}[/green]")
-                break
+                # Fallback: try to parse text-based tool calls (for Ollama/small models)
+                parsed = self._parse_text_tools(response.get("content", ""))
+                if parsed:
+                    console.print(f"  [dim](parsed {len(parsed)} text tool calls)[/dim]")
+                    for fn_name, fn_args in parsed:
+                        console.print(f"  [dim]-> {fn_name}({list(fn_args.keys())})[/dim]")
+                        result = await self._execute_tool(fn_name, fn_args)
+                        if result is None:
+                            result = "Tool returned no output"
+                        self.messages.append({
+                            "role": "tool",
+                            "tool_call_id": "text-fallback",
+                            "content": str(result),
+                        })
+                        if fn_name == "run_tests":
+                            try:
+                                test_result = json.loads(result)
+                            except json.JSONDecodeError:
+                                test_result = {"passed": False, "stderr": result}
+                            if test_result.get("passed"):
+                                console.print("  [green]Tests passed[/green]")
+                                self.consecutive_failures = 0
+                                if self.config.get("agent", {}).get("auto_commit", True):
+                                    self.git.checkpoint(f"auto: self-improvement cycle {time.strftime('%Y-%m-%dT%H:%M')}")
+                                    self.memory.record_improvement(
+                                        desc=f"Text-fallback iteration {iterations}",
+                                        file=fn_args.get("file", "unknown"),
+                                        success=True,
+                                    )
+                            else:
+                                console.print("  [red]Tests failed[/red]")
+                                self.consecutive_failures += 1
+                                if self.consecutive_failures >= self.max_failures:
+                                    console.print("  [red]Max failures reached — rolling back[/red]")
+                                    self.git.rollback()
+                                    break
+                    continue
+                else:
+                    console.print(f"[green]Agent finished: {response['content'][:300]}[/green]")
+                    break
 
             for tc in response["tool_calls"]:
                 fn_name = tc.function.name
