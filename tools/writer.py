@@ -1,4 +1,9 @@
-"""Code writer — applies patches and creates new files."""
+"""Code writer — applies patches and creates new files.
+
+SAFETY: All write operations validate content is real Python/code, not
+escaped string literals (a recurring bug where the LLM returns backslash-n
+instead of real newlines). This prevents file corruption.
+"""
 
 import os
 from pathlib import Path
@@ -9,8 +14,38 @@ class CodeWriter:
     def __init__(self, root: str = "."):
         self.root = Path(root)
 
+    def _validate_content(self, path: str, content: str) -> None:
+        """Validate that content is real source code, not an escaped string.
+        
+        Raises ValueError if the content appears to be a corrupted/escaped
+        string literal (e.g. backslash-n instead of real newlines).
+        """
+        if not content:
+            raise ValueError("Refusing to write empty content to " + path)
+
+        lines = content.splitlines()
+        
+        # Detect escaped-newline corruption: single very long line with literal backslash-n
+        if len(lines) <= 2 and len(content) > 200 and "\\n" in content:
+            raise ValueError(
+                "Refusing to write " + path + ": content appears to be an escaped string "
+                "literal (" + str(len(lines)) + " lines, " + str(len(content)) + " chars with literal backslash-n). "
+                "This is a known corruption pattern - the LLM returned escaped newlines instead of real ones."
+            )
+        
+        # Detect double-quote escaping: triple escaped quotes at start
+        stripped = content.strip()
+        if stripped.startswith('\\""\\"') or stripped.startswith('"""') == False and stripped.startswith('\\"'):
+            # Check for the specific corruption: starts with escaped quotes
+            if stripped[:3] == '\\"\\' or '\\"\\"\\"' in stripped[:20]:
+                raise ValueError(
+                    "Refusing to write " + path + ": content starts with escaped quotes. "
+                    "This is corrupted output, not real code."
+                )
+
     def write_file(self, path: str, content: str) -> None:
-        """Write content to a file (creates or overwrites)."""
+        """Write content to a file (creates or overwrites). Validates first."""
+        self._validate_content(path, content)
         full = self.root / path if not os.path.isabs(path) else Path(path)
         full.parent.mkdir(parents=True, exist_ok=True)
         full.write_text(content, encoding="utf-8")
@@ -26,7 +61,8 @@ class CodeWriter:
         return True
 
     def create_file(self, path: str, content: str) -> None:
-        """Create a new file."""
+        """Create a new file. Validates first."""
+        self._validate_content(path, content)
         full = self.root / path if not os.path.isabs(path) else Path(path)
         if full.exists():
             return  # Don't overwrite on create
@@ -40,7 +76,7 @@ class CodeWriter:
         diff = difflib.unified_diff(
             old_content.splitlines(keepends=True),
             new_content.splitlines(keepends=True),
-            fromfile=f"a/{path}",
-            tofile=f"b/{path}",
+            fromfile="a/" + path,
+            tofile="b/" + path,
         )
         return "".join(diff)
