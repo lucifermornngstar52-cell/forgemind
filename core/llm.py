@@ -59,8 +59,7 @@ class LLM:
             "temperature": self.temperature,
             "max_tokens": self.max_tokens,
         }
-        if tools and self.backend != "ollama":
-            # Ollama with small models handles tool calling poorly — skip for reliability
+        if tools:
             kwargs["tools"] = tools
             kwargs["tool_choice"] = "auto"
 
