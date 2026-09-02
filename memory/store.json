@@ -610,6 +610,42 @@
       "name": "Function Calling LLM Best Practices: Complete 2026 Guide",
       "source": "web_search",
       "summary": "FunctionCallingLLMBest Practices: The Complete2026GuideFunctioncalling(also called tool use or plugin capabilities) transformsLLMsfrom chat interfaces into action-takingagents. Instead of just generat"
+    },
+    {
+      "timestamp": "2026-09-02T07:29:28.987851",
+      "name": "The Architecture Behind Self-Improving AI Agents (Full ... - Medium",
+      "source": "web_search",
+      "summary": "This framework demonstrates how anAIagentcan continuously improve its responses using a feedback-driven learning loop. The framework introduces a simple but powerfularchitecture. Instead of a ..."
+    },
+    {
+      "timestamp": "2026-09-02T07:29:30.854090",
+      "name": "Self-Improving Loop: How to Build AI Agents That Actually Learn",
+      "source": "web_search",
+      "summary": "Learn how to buildself-improvingAIagentsthat don't repeat mistakes. This guide explains thearchitecturewith a tutorial inPython."
+    },
+    {
+      "timestamp": "2026-09-02T07:29:31.024919",
+      "name": "Awesome AI Agent Testing - GitHub",
+      "source": "web_search",
+      "summary": "AwesomeAIAgentTestingA comprehensive, curated list of resources fortestingAIagents, including frameworks, methodologies, benchmarks, tools, and best practices.AIagentsareautonomoussystems that perceiv"
+    },
+    {
+      "timestamp": "2026-09-02T07:29:31.199643",
+      "name": "AI Agent Evaluation Frameworks 2026: How Autonomous Systems Are Being ...",
+      "source": "web_search",
+      "summary": "AsAIagentstransition from experimental tools to production workloads, the need for rigorous evaluation frameworks has never been more critical. This comprehensive analysis explores the emerging standa"
+    },
+    {
+      "timestamp": "2026-09-02T07:29:31.377517",
+      "name": "LLM Function Calling and Tool Use Guide 2026: OpenAI, Anthropic, Google",
+      "source": "web_search",
+      "summary": "Complete2026guide toLLMfunctioncallingacross OpenAI, Anthropic, and Google Gemini—with code, security, and production patterns."
+    },
+    {
+      "timestamp": "2026-09-02T07:29:31.549926",
+      "name": "Tool Use and Function Calling in AI Agents - zylos.ai",
+      "source": "web_search",
+      "summary": "A comprehensive analysis of the current state of tool/functioncallingacross majorLLMproviders, standardization efforts led by MCP, benchmark landscapes, emerging patterns like parallel tool calls and "
     }
   ],
   "metrics": {}
