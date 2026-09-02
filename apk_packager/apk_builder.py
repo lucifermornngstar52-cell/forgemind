@@ -1,1 +1,239 @@
-\"\"\"Forgemind APK Builder — self-packaging into an Android app.\\n\\nGenerates a minimal Flutter project that wraps Forgemind's core,\\npushes it to GitHub, and triggers a CI build to produce an APK.\\n\"\"\"\\n\\nimport os\\nimport json\\nimport subprocess\\nfrom pathlib import Path\\nfrom rich.console import Console\\n\\nconsole = Console()\\n\\n# Flutter project template — minimal dark-themed Forgemind mobile app\\nFLUTTER_MAIN = r'''import 'package:flutter/material.dart';\\nimport 'package:http/http.dart' as http;\\nimport 'dart:convert';\\n\\nvoid main() => runApp(const ForgemindApp());\\n\\nclass ForgemindApp extends StatelessWidget {\\n  const ForgemindApp({super.key});\\n\\n  @override\\n  Widget build(BuildContext context) {\\n    return MaterialApp(\\n      title: 'Forgemind',\\n      debugShowCheckedModeBanner: false,\\n      theme: ThemeData(\\n        brightness: Brightness.dark,\\n        scaffoldBackgroundColor: const Color(0xFF0A0A0F),\\n        colorScheme: const ColorScheme.dark(\\n          primary: Color(0xFF6C5CE7),\\n          secondary: Color(0xFF00CEC9),\\n          surface: Color(0xFF15151F),\\n        ),\\n      ),\\n      home: const ForgemindHome(),\\n    );\\n  }\\n}\\n\\nclass ForgemindHome extends StatefulWidget {\\n  const ForgemindHome({super.key});\\n  @override State<ForgemindHome> createState() => _ForgemindHomeState();\\n}\\n\\nclass _ForgemindHomeState extends State<ForgemindHome> {\\n  final List<String> _log = [];\\n  bool _running = false;\\n  String _status = 'Idle';\\n\\n  Future<void> _runCycle() async {\\n    setState(() {\\n      _running = true;\\n      _status = 'Forging...';\\n      _log.insert(0, '> Starting self-improvement cycle...');\\n    });\\n\\n    try {\\n      // Forgemind runs locally via platform channel or HTTP\\n      final response = await http.post(\\n        Uri.parse('https://forgemind-bot-hehb.onrender.com/cycle'),\\n        headers: {'Content-Type': 'application/json'},\\n      ).timeout(const Duration(seconds: 20));\\n\\n      final result = json.decode(response.body);\\n      setState(() {\\n        _status = 'Complete';\\n        _log.insert(0, '> Improvements: ${result[\"improvements\"]}');\\n        _log.insert(0, '> Success rate: ${result[\"success_rate\"]}');\\n        _log.insert(0, '> Iterations: ${result[\"iterations\"]}');\\n        _log.insert(0, '> Cycle complete.');\\n      });\\n    } catch (e) {\\n      setState(() {\\n        _status = 'Offline — running in standalone mode';\\n        _log.insert(0, '> Forgemind core not reachable. APK runs in display mode.');\\n        _log.insert(0, '> Connect to Forgemind server for live cycles.');\\n      });\\n    } finally {\\n      setState(() => _running = false);\\n    }\\n  }\\n\\n  @override\\n  Widget build(BuildContext context) {\\n    return Scaffold(\\n      appBar: AppBar(\\n        title: const Row(children: [\\n          Icon(Icons.precision_manufacturing, color: Color(0xFF6C5CE7)),\\n          SizedBox(width: 8),\\n          Text('FORGEMIND', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2)),\\n        ]),\\n        actions: [\\n          Padding(\\n            padding: const EdgeInsets.only(right: 16),\\n            child: Center(\\n              child: Container(\\n                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),\\n                decoration: BoxDecoration(\\n                  color: _running ? const Color(0xFF00CEC9).withOpacity(0.2) : const Color(0xFF15151F),\\n                  borderRadius: BorderRadius.circular(12),\\n                ),\\n                child: Text(_status, style: TextStyle(\\n                  fontSize: 12,\\n                  color: _running ? const Color(0xFF00CEC9) : Colors.white54,\\n                )),\\n              ),\\n            ),\\n          ),\\n        ],\\n      ),\\n      body: Column(children: [\\n        Expanded(\\n          child: _log.isEmpty\\n              ? const Center(child: Column(\\n                  mainAxisAlignment: MainAxisAlignment.center,\\n                  children: [\\n                    Icon(Icons.precision_manufacturing, size: 64, color: Color(0xFF6C5CE7)),\\n                    SizedBox(height: 16),\\n                    Text('The mind that forges itself',\\n                      style: TextStyle(color: Colors.white54, fontSize: 16)),\\n                    SizedBox(height: 8),\\n                    Text('Press FORGE to begin', style: TextStyle(color: Colors.white30, fontSize: 13)),\\n                  ],\\n                ))\\n              : ListView.builder(\\n                  padding: const EdgeInsets.all(16),\\n                  itemCount: _log.length,\\n                  itemBuilder: (ctx, i) => Padding(\\n                    padding: const EdgeInsets.only(bottom: 6),\\n                    child: Text(_log[i],\\n                      style: const TextStyle(color: Colors.white70, fontFamily: 'monospace', fontSize: 13)),\\n                  ),\\n                ),\\n        ),\\n        Padding(\\n          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),\\n          child: SizedBox(\\n            width: double.infinity,\\n            height: 56,\\n            child: ElevatedButton.icon(\\n              onPressed: _running ? null : _runCycle,\\n              icon: _running\\n                  ? const SizedBox(width: 20, height: 20,\\n                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))\\n                  : const Icon(Icons.whatshot, size: 24),\\n              label: Text(\\n                _running ? 'FORGING...' : 'FORGE',\\n                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2),\\n              ),\\n              style: ElevatedButton.styleFrom(\\n                backgroundColor: const Color(0xFF6C5CE7),\\n                foregroundColor: Colors.white,\\n                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),\\n              ),\\n            ),\\n          ),\\n        ),\\n      ]),\\n    );\\n  }\\n}\\n'''\\n\\nGITHUB_ACTIONS = r'''name: Build Forgemind APK\\n\\non:\\n  push:\\n    branches: [main]\\n  workflow_dispatch:\\n\\njobs:\\n  build:\\n    runs-on: ubuntu-latest\\n    steps:\\n      - uses: actions/checkout@v4\\n      - uses: subosito/flutter-action@v2\\n        with:\\n          channel: stable\\n      - run: flutter pub get\\n      - run: flutter build apk --release\\n      - uses: actions/upload-artifact@v4\\n        with:\\n          name: forgemind-apk\\n          path: build/app/outputs/flutter-apk/app-release.apk\\n'''\\n\\nPUBSPEC = r'''name: forgemind\\ndescription: Forgemind — The mind that forges itself\\nversion: 1.0.0+1\\n\\nenvironment:\\n  sdk: \">=3.3.0 <4.0.0\"\\n\\ndependencies:\\n  flutter:\\n    sdk: flutter\\n  http: ^1.2.2\\n\\ndev_dependencies:\\n  flutter_test:\\n    sdk: flutter\\n  flutter_lints: ^4.0.0\\n\\nflutter:\\n  uses-material-design: true\\n'''\\n\\n\\nclass ApkBuilder:\\n    \"\"\"Packages Forgemind into an Android APK via a Flutter wrapper.\"\"\"\\n\\n    def __init__(self, github_token: str = \"\", repo_name: str = \"forgemind-mobile\"):\\n        self.token = github_token\\n        self.repo_name = repo_name\\n\\n    def generate_flutter_project(self, output_dir: str = \"forgemind-mobile\") -> str:\\n        \"\"\"Generate a complete Flutter project that wraps Forgemind.\"\"\"\\n        root = Path(output_dir)\\n\\n        # Create directory structure\\n        dirs = [\\n            \"lib\",\\n            \"android/app/src/main/kotlin/com/forgemind\",\\n            \"android/app/src/main/res/values\",\\n            \".github/workflows\",\\n        ]\\n        for d in dirs:\\n            (root / d).mkdir(parents=True, exist_ok=True)\\n\\n        # lib/main.dart\\n        (root / \"lib\" / \"main.dart\").write_text(FLUTTER_MAIN)\\n\\n        # pubspec.yaml\\n        (root / \"pubspec.yaml\").write_text(PUBSPEC)\\n\\n
+"""Forgemind APK Builder — self-packaging into an Android app.
+
+Generates a minimal Flutter project that wraps Forgemind's core,
+pushes it to GitHub, and triggers a CI build to produce an APK.
+"""
+
+import os
+import json
+import subprocess
+from pathlib import Path
+from rich.console import Console
+
+console = Console()
+
+# Flutter project template — minimal dark-themed Forgemind mobile app
+FLUTTER_MAIN = r'''import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+void main() => runApp(const ForgemindApp());
+
+class ForgemindApp extends StatelessWidget {
+  const ForgemindApp({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Forgemind',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        brightness: Brightness.dark,
+        scaffoldBackgroundColor: const Color(0xFF0A0A0F),
+        colorScheme: const ColorScheme.dark(
+          primary: Color(0xFF6C5CE7),
+          secondary: Color(0xFF00CEC9),
+          surface: Color(0xFF15151F),
+        ),
+      ),
+      home: const ForgemindHome(),
+    );
+  }
+}
+
+class ForgemindHome extends StatefulWidget {
+  const ForgemindHome({super.key});
+  @override State<ForgemindHome> createState() => _ForgemindHomeState();
+}
+
+class _ForgemindHomeState extends State<ForgemindHome> {
+  final List<String> _log = [];
+  bool _running = false;
+  String _status = 'Idle';
+
+  Future<void> _runCycle() async {
+    setState(() {
+      _running = true;
+      _status = 'Forging...';
+      _log.insert(0, '> Starting self-improvement cycle...');
+    });
+
+    try {
+      // Forgemind runs locally via platform channel or HTTP
+      final response = await http.post(
+        Uri.parse('https://forgemind-bot-hehb.onrender.com/cycle'),
+        headers: {'Content-Type': 'application/json'},
+      ).timeout(const Duration(seconds: 20));
+
+      final result = json.decode(response.body);
+      setState(() {
+        _status = 'Complete';
+        _log.insert(0, '> Improvements: ${result["improvements"]}');
+        _log.insert(0, '> Success rate: ${result["success_rate"]}');
+        _log.insert(0, '> Iterations: ${result["iterations"]}');
+        _log.insert(0, '> Cycle complete.');
+      });
+    } catch (e) {
+      setState(() {
+        _status = 'Offline — running in standalone mode';
+        _log.insert(0, '> Forgemind core not reachable. APK runs in display mode.');
+        _log.insert(0, '> Connect to Forgemind server for live cycles.');
+      });
+    } finally {
+      setState(() => _running = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Row(children: [
+          Icon(Icons.precision_manufacturing, color: Color(0xFF6C5CE7)),
+          SizedBox(width: 8),
+          Text('FORGEMIND', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2)),
+        ]),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                decoration: BoxDecoration(
+                  color: _running ? const Color(0xFF00CEC9).withOpacity(0.2) : const Color(0xFF15151F),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(_status, style: TextStyle(
+                  fontSize: 12,
+                  color: _running ? const Color(0xFF00CEC9) : Colors.white54,
+                )),
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Column(children: [
+        Expanded(
+          child: _log.isEmpty
+              ? const Center(child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.precision_manufacturing, size: 64, color: Color(0xFF6C5CE7)),
+                    SizedBox(height: 16),
+                    Text('The mind that forges itself',
+                      style: TextStyle(color: Colors.white54, fontSize: 16)),
+                    SizedBox(height: 8),
+                    Text('Press FORGE to begin', style: TextStyle(color: Colors.white30, fontSize: 13)),
+                  ],
+                ))
+              : ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _log.length,
+                  itemBuilder: (ctx, i) => Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Text(_log[i],
+                      style: const TextStyle(color: Colors.white70, fontFamily: 'monospace', fontSize: 13)),
+                  ),
+                ),
+        ),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+          child: SizedBox(
+            width: double.infinity,
+            height: 56,
+            child: ElevatedButton.icon(
+              onPressed: _running ? null : _runCycle,
+              icon: _running
+                  ? const SizedBox(width: 20, height: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                  : const Icon(Icons.whatshot, size: 24),
+              label: Text(
+                _running ? 'FORGING...' : 'FORGE',
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2),
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6C5CE7),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
+          ),
+        ),
+      ]),
+    );
+  }
+}
+'''
+
+GITHUB_ACTIONS = r'''name: Build Forgemind APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - run: flutter pub get
+      - run: flutter build apk --release
+      - uses: actions/upload-artifact@v4
+        with:
+          name: forgemind-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+'''
+
+PUBSPEC = r'''name: forgemind
+description: Forgemind — The mind that forges itself
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+'''
+
+
+class ApkBuilder:
+    """Packages Forgemind into an Android APK via a Flutter wrapper."""
+
+    def __init__(self, github_token: str = "", repo_name: str = "forgemind-mobile"):
+        self.token = github_token
+        self.repo_name = repo_name
+
+    def generate_flutter_project(self, output_dir: str = "forgemind-mobile") -> str:
+        """Generate a complete Flutter project that wraps Forgemind."""
+        root = Path(output_dir)
+
+        # Create directory structure
+        dirs = [
+            "lib",
+            "android/app/src/main/kotlin/com/forgemind",
+            "android/app/src/main/res/values",
+            ".github/workflows",
+        ]
+        for d in dirs:
+            (root / d).mkdir(parents=True, exist_ok=True)
+
+        # lib/main.dart
+        (root / "lib" / "main.dart").write_text(FLUTTER_MAIN)
+
+        # pubspec.yaml
+        (root / "pubspec.yaml").write_text(PUBSPEC)
+
