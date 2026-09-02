@@ -1,7 +1,8 @@
 llm:
-  # Primary: Ollama with local open-source model (fully independent, no API key)
-  # Fallback: OpenAI (set OPENAI_PROJECT_KEY env var)
-  model: qwen2.5:3b
+  # Primary: Groq (free tier, open-source models, GPT-4 level)
+  # Model: openai/gpt-oss-120b (120B params, open-source, free on Groq)
+  # Fallback: Ollama (local, if GROQ_API_KEY not set)
+  model: openai/gpt-oss-120b
   temperature: 0.3
   max_tokens: 4096
 

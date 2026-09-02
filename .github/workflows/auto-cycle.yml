@@ -22,14 +22,6 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
 
-      - name: Install Ollama + pull model (independent brain)
-        run: |
-          curl -fsSL https://ollama.com/install.sh | sh
-          ollama serve &
-          sleep 5
-          ollama pull qwen2.5:3b
-          curl -s http://localhost:11434/v1/models | python3 -c "import json,sys; d=json.load(sys.stdin); print('Models:', [m['id'] for m in d.get('data',[])])"
-
       - name: Run self-diagnostic
         env:
           GITHUB_TOKEN_2: ${{ secrets.GH_PAT }}
@@ -37,9 +29,8 @@ jobs:
 
       - name: Run self-improvement cycle
         env:
-          LLM_BACKEND: ollama
-          OLLAMA_HOST: http://localhost:11434
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LLM_BACKEND: groq
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GITHUB_TOKEN_2: ${{ secrets.GH_PAT }}
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}

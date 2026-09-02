@@ -2,16 +2,16 @@ name: Full Cycle (Research + Code + Deploy)
 
 on:
   schedule:
-    # Every 2 hours: 1h research, 1h code
+    # Every 2 hours: research + code + deploy
     - cron: "0 */2 * * *"
   workflow_dispatch:
 
-# FORGEMIND uses its OWN brain — Ollama with qwen2.5:3b (open-source, local, no API key)
-# OpenAI is kept as fallback only if Ollama fails to start
+# FORGEMIND brain: Groq (free, open-source gpt-oss-120b, GPT-4 level)
+# No Ollama needed — Groq is fast, free, and 120B params
 
 jobs:
   research:
-    name: "Phase 1 - Deep Research (1h)"
+    name: "Phase 1 - Deep Research"
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -27,29 +27,15 @@ jobs:
       - name: Install Python deps
         run: pip install httpx pyyaml rich openai beautifulsoup4 chromadb
 
-      - name: Install Ollama + pull model (independent brain)
-        run: |
-          echo "=== Installing Ollama (local LLM, no external API) ==="
-          curl -fsSL https://ollama.com/install.sh | sh
-          # Start ollama server in background
-          ollama serve &
-          sleep 5
-          echo "=== Pulling qwen2.5:3b (open-source model, ~2GB) ==="
-          ollama pull qwen2.5:3b
-          echo "=== Ollama ready ==="
-          # Quick smoke test
-          curl -s http://localhost:11434/v1/models | python3 -c "import json,sys; d=json.load(sys.stdin); print('Models:', [m['id'] for m in d.get('data',[])])"
-
       - name: Research phase (many cycles)
         env:
-          LLM_BACKEND: ollama
-          OLLAMA_HOST: http://localhost:11434
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LLM_BACKEND: groq
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GITHUB_TOKEN_2: ${{ secrets.GH_PAT }}
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
         run: |
-          echo "=== DEEP RESEARCH PHASE (using local Ollama brain) ==="
+          echo "=== DEEP RESEARCH PHASE (Groq gpt-oss-120b brain) ==="
           python main.py --loop 5 --research --deep
           echo "Research complete"
 
@@ -68,7 +54,7 @@ jobs:
           fi
 
   code:
-    name: "Phase 2 - Code Improvement (1h)"
+    name: "Phase 2 - Code Improvement"
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -85,27 +71,15 @@ jobs:
       - name: Install Python deps
         run: pip install httpx pyyaml rich openai beautifulsoup4 chromadb
 
-      - name: Install Ollama + pull model (independent brain)
-        run: |
-          echo "=== Installing Ollama ==="
-          curl -fsSL https://ollama.com/install.sh | sh
-          ollama serve &
-          sleep 5
-          echo "=== Pulling qwen2.5:3b ==="
-          ollama pull qwen2.5:3b
-          echo "=== Ollama ready ==="
-          curl -s http://localhost:11434/v1/models | python3 -c "import json,sys; d=json.load(sys.stdin); print('Models:', [m['id'] for m in d.get('data',[])])"
-
       - name: Code improvement phase
         env:
-          LLM_BACKEND: ollama
-          OLLAMA_HOST: http://localhost:11434
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LLM_BACKEND: groq
+          GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
           GITHUB_TOKEN_2: ${{ secrets.GH_PAT }}
           RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
           RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
         run: |
-          echo "=== CODE IMPROVEMENT PHASE (using local Ollama brain) ==="
+          echo "=== CODE IMPROVEMENT PHASE (Groq gpt-oss-120b brain) ==="
           python main.py --loop 5
           echo "Code phase complete"
 
